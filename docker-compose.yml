@@ -1,0 +1,106 @@
+services:
+  frontend:
+    build: ./virtual-school-ui
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./virtual-school-ui:/app
+    networks:
+      - keycloak-network
+    depends_on:
+      - backend
+
+  backend:
+    build: ./virtual-school-backend
+    ports:
+      - "8080:8080"
+    networks:
+      - keycloak-network
+    depends_on:
+      backend-db:
+        condition: service_healthy
+      keycloak-db:
+        condition: service_healthy
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:latest
+    environment:
+      - KC_HOSTNAME=localhost
+      - KC_DB=postgres
+      - KC_DB_USERNAME=keycloakuser
+      - KC_DB_PASSWORD=keycloakpass
+      - KC_DB_URL_DATABASE=keycloak
+      - KC_DB_URL_HOST=keycloak-db
+      - KC_BOOTSTRAP_ADMIN_USERNAME=keycloakadmin
+      - KC_BOOTSTRAP_ADMIN_PASSWORD=keycloakadmin
+    volumes:
+      - ./realm-export.json:/opt/keycloak/data/import/realm-export.json
+    ports:
+      - "8082:8080"
+    depends_on:
+      keycloak-db:
+        condition: service_healthy
+    networks:
+      - keycloak-network
+    restart: always
+    command:
+      - "start-dev"
+
+  keycloak-db:
+    image: postgres:latest
+    environment:
+      - POSTGRES_DB=keycloak
+      - POSTGRES_USER=keycloakuser
+      - POSTGRES_PASSWORD=keycloakpass
+    ports:
+      - "5432:5432"
+    volumes:
+      - keycloak-postgres-data:/var/lib/postgresql
+    networks:
+      - keycloak-network
+    restart: always
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U keycloakuser -d keycloak"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend-db:
+    image: postgres:latest
+    environment:
+      - POSTGRES_DB=virtualschooldb
+      - POSTGRES_USER=schooluser
+      - POSTGRES_PASSWORD=schoolpass
+    ports:
+      - "5433:5432"
+    volumes:
+      - backend-postgres-data:/var/lib/postgresql
+    networks:
+      - keycloak-network
+    restart: always
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U schooluser -d virtualschooldb"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  adminer:
+    image: adminer:latest
+    ports:
+      - "8083:8080"
+    depends_on:
+      - keycloak-db
+      - backend-db
+    networks:
+      - keycloak-network
+    restart: always
+
+networks:
+  keycloak-network:
+    driver: bridge
+
+volumes:
+  keycloak-postgres-data:
+    driver: local
+  backend-postgres-data:
+    driver: local
