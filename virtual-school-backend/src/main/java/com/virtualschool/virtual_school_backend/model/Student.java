@@ -13,9 +13,9 @@ public class Student {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private String firstName;
-    private String lastName;
-    private String email;
+
+    @Column(unique = true, nullable = false)
+    private String keycloakId;
 
     @ManyToMany(mappedBy = "students")
     private Set<StudentGroup> groups = new HashSet<>();
@@ -23,10 +23,8 @@ public class Student {
     public Student() {
     }
 
-    public Student(String firstName, String lastName, String email) {
-        this.firstName = firstName;
-        this.lastName = lastName;
-        this.email = email;
+    public Student(String keycloakId) {
+        this.keycloakId = keycloakId;
     }
 
     public Long getId() {
@@ -37,28 +35,12 @@ public class Student {
         this.id = id;
     }
 
-    public String getFirstName() {
-        return firstName;
+    public String getKeycloakId() {
+        return keycloakId;
     }
 
-    public void setFirstName(String firstName) {
-        this.firstName = firstName;
-    }
-
-    public String getLastName() {
-        return lastName;
-    }
-
-    public void setLastName(String lastName) {
-        this.lastName = lastName;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
+    public void setKeycloakId(String keycloakId) {
+        this.keycloakId = keycloakId;
     }
 
     public Set<StudentGroup> getGroups() {
@@ -74,21 +56,19 @@ public class Student {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Student student = (Student) o;
-        return Objects.equals(id, student.id) && Objects.equals(firstName, student.firstName) && Objects.equals(lastName, student.lastName) && Objects.equals(email, student.email);
+        return Objects.equals(id, student.id) && Objects.equals(keycloakId, student.keycloakId);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, firstName, lastName, email);
+        return Objects.hash(id, keycloakId);
     }
 
     @Override
     public String toString() {
         return "Student{" +
                "id=" + id +
-               ", firstName='" + firstName + '\'' +
-               ", lastName='" + lastName + '\'' +
-               ", email='" + email + '\'' +
+               ", keycloakId='" + keycloakId + '\'' +
                '}';
     }
 }

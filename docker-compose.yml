@@ -45,6 +45,7 @@ services:
     restart: always
     command:
       - "start-dev"
+      - "--import-realm"
 
   keycloak-db:
     image: postgres:latest

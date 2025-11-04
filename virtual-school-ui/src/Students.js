@@ -1,13 +1,12 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import keycloak from './keycloak';
-import StudentForm from './StudentForm';
 
 function Students() {
   const [students, setStudents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [editingStudent, setEditingStudent] = useState(null);
-  const [isCreating, setIsCreating] = useState(false);
+  const navigate = useNavigate();
 
   const fetchStudents = async () => {
     try {
@@ -33,47 +32,8 @@ function Students() {
     fetchStudents();
   }, []);
 
-  const handleSave = async (student) => {
-    const url = student.id ? `/api/students/${student.id}` : '/api/students';
-    const method = student.id ? 'PUT' : 'POST';
-
-    try {
-      const response = await fetch(url, {
-        method,
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${keycloak.token}`,
-        },
-        body: JSON.stringify(student),
-      });
-      if (!response.ok) {
-        throw new Error('Failed to save student');
-      }
-      setEditingStudent(null);
-      setIsCreating(false);
-      fetchStudents();
-    } catch (error) {
-      setError(error);
-    }
-  };
-
-  const handleDelete = async (id) => {
-    if (window.confirm('Are you sure you want to delete this student?')) {
-      try {
-        const response = await fetch(`/api/students/${id}`, {
-          method: 'DELETE',
-          headers: {
-            Authorization: `Bearer ${keycloak.token}`,
-          },
-        });
-        if (!response.ok) {
-          throw new Error('Failed to delete student');
-        }
-        fetchStudents();
-      } catch (error) {
-        setError(error);
-      }
-    }
+  const handleAddStudent = () => {
+    navigate('/create-user', { state: { role: 'student' } });
   };
 
   if (loading) return <div>Loading...</div>;
@@ -82,15 +42,10 @@ function Students() {
   return (
     <div>
       <h2>Students</h2>
-      <button onClick={() => { setIsCreating(true); setEditingStudent(null); }}>Add Student</button>
-      
-      {(isCreating || editingStudent) && (
-        <StudentForm 
-          student={editingStudent} 
-          onSave={handleSave} 
-        />
+      {keycloak.hasRealmRole('admin') && (
+        <button onClick={handleAddStudent}>Add Student</button>
       )}
-
+      
       <table>
         <thead>
           <tr>
@@ -98,7 +53,6 @@ function Students() {
             <th>First Name</th>
             <th>Last Name</th>
             <th>Email</th>
-            <th>Actions</th>
           </tr>
         </thead>
         <tbody>
@@ -108,10 +62,6 @@ function Students() {
               <td>{student.firstName}</td>
               <td>{student.lastName}</td>
               <td>{student.email}</td>
-              <td>
-                <button onClick={() => { setEditingStudent(student); setIsCreating(false); }}>Edit</button>
-                <button onClick={() => handleDelete(student.id)}>Delete</button>
-              </td>
             </tr>
           ))}
         </tbody>
