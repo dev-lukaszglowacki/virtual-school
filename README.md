@@ -2,50 +2,35 @@
 
 # Project Overview
 
-This project is a virtual school management system. It consists of a Java Spring Boot backend and a React frontend. Keycloak is used for user authentication and authorization. The backend exposes a REST API for managing the school's educational structure (groups, subjects, lesson plans), while the frontend provides a user-friendly interface.
+This project is a virtual school management system featuring a Java Spring Boot backend and a React frontend. It uses Keycloak for identity and access management and is fully containerized with Docker Compose for easy setup.
 
 Key features include:
 *   Role-based access for Admins, Teachers, and Students.
 *   A central user creation form for administrators.
-*   Timetable views for both students and teachers to see their personalized schedules.
-
-This project follows a modern, containerized, client-server architecture.
+*   Personalized timetable views for both students and teachers.
 
 # Technical Overview
 
 ## Backend
 
-The backend is a RESTful API built with **Java** and the **Spring Boot** framework. Its primary responsibilities include business logic, data persistence, and securing resources.
+The backend is a RESTful API built with **Java** and **Spring Boot**.
 
-*   **User Management:** The application uses Keycloak as the single source of truth for user identity. The backend's `Student` and `Lecturer` database tables only store a `keycloakId`, linking the application's data to Keycloak's user record.
-*   **API:** A REST API is exposed to manage educational entities. When the frontend requests lists of students or lecturers, the backend fetches records from its database and enriches them with user details (name, email) by calling the Keycloak API via the **Keycloak Admin Client**.
-*   **Security:** **Spring Security** protects the API endpoints. It is configured as an **OAuth 2.0 Resource Server**, validating JWTs on every request.
-*   **Database:** **PostgreSQL** is used for data storage, with **Spring Data JPA** for object-relational mapping.
+*   **User Management:** Uses Keycloak as the single source of truth for user identity. The application database stores a `keycloakId` to link local data (like a student's group) to a Keycloak user.
+*   **API:** Enriches data on the fly. When user lists are requested, it fetches records from its own database and combines them with fresh user details (name, email) from the Keycloak API.
+*   **Security:** Endpoints are secured using **Spring Security** as an OAuth 2.0 Resource Server.
+*   **Database:** **PostgreSQL** with **Spring Data JPA**.
 
 ## Frontend
 
-The frontend is a single-page application built with **JavaScript** and the **React** library.
+The frontend is a single-page application built with **React**.
 
-*   **Authentication:** The **`keycloak-js`** library handles the OpenID Connect authentication flow.
-*   **API Communication:** The JWT from Keycloak is included in the `Authorization` header of every request to the backend.
-*   **UI:** The UI is built with reusable React components, including role-specific views. The "Add Student" and "Add Lecturer" buttons redirect to a central user creation form with the correct role pre-selected.
+*   **Authentication:** The **`keycloak-js`** library manages the OpenID Connect authentication flow.
+*   **UI:** The UI features a streamlined workflow for admins, allowing them to add students or lecturers via a central form that is pre-filled with the correct role.
 *   **Routing:** **`react-router-dom`** is used for client-side routing.
 
-## Authentication and Authorization
+## Services & Authentication
 
-**Keycloak** is used as a centralized identity and access management (IAM) solution.
-
-*   **Realm:** A dedicated realm named `virtual-school` is automatically imported from `realm-export.json`.
-*   **Clients:**
-    *   `virtual-school-ui`: A public client for the frontend.
-    *   `admin-cli`: A confidential client used by the backend to communicate with the Keycloak Admin API.
-*   **Roles:** Role-based access control (RBAC) is implemented using roles defined in Keycloak (`admin`, `teacher`, `student`).
-
-## Services
-
-The entire infrastructure is managed using **Docker Compose**.
-
-*   **`docker-compose.yml`:** This file defines all services (`frontend`, `backend`, `keycloak`, `postgres` databases, `adminer`), their configurations, and the network they communicate on.
+The entire infrastructure is managed via **Docker Compose**, which orchestrates the frontend, backend, databases, and **Keycloak**. A realm is automatically imported on first launch to provide default clients, roles (`admin`, `teacher`, `student`), and users.
 
 # Getting Started
 
@@ -56,53 +41,34 @@ The entire infrastructure is managed using **Docker Compose**.
 
 ## Running the Application
 
-The entire project is orchestrated using Docker Compose.
+The entire project is designed to be run with a single command from the project root.
 
 1.  **Build and Start All Services**
-    Run the following command from the project's root directory:
     ```bash
     docker compose up --build -d
     ```
-    *   `--build` forces a rebuild of the images, which is necessary after code changes.
-    *   `-d` runs the containers in detached mode.
-
 2.  **Stop All Services**
     ```bash
     docker compose down
     ```
-
-3.  **Stop Services and Remove Data**
-    To perform a clean restart and re-import the Keycloak realm, run:
+3.  **Stop Services and Remove Data** (for a clean restart)
     ```bash
     docker compose down -v
     ```
 
-## Development Environment
-
-On startup, the backend database is automatically seeded with sample data (groups and subjects) from `import.sql`. The Keycloak realm, clients, and default users are imported from `realm-export.json`.
+**Note:** For more detailed instructions on running the backend or frontend as standalone applications, please see the `README.md` files in the `virtual-school-backend` and `virtual-school-ui` directories.
 
 ## Accessing the Application
 
 *   **Frontend:** [http://localhost:3000](http://localhost:3000)
-*   **Backend API:** [http://localhost:8080](http://localhost:8080)
 *   **Keycloak Admin Console:** [http://localhost:8082](http://localhost:8082)
 *   **Adminer (Database Admin Tool):** [http://localhost:8083](http://localhost:8083)
 
 ## Default Credentials
 
-You can log in with the following users defined in `realm-export.json`:
-
-*   **Role:** Admin
-    *   **Username:** `adminuser`
-    *   **Password:** `adminpass`
-*   **Role:** Teacher
-    *   **Username:** `teacheruser`
-    *   **Password:** `teacherpass`
-*   **Role:** Student
-    *   **Username:** `studentuser`
-    *   **Password:** `studentpass`
-*   **Keycloak Admin Console:**
-    *   **Username:** `keycloakadmin`
-    *   **Password:** `keycloakadmin`
+*   **Admin:** `adminuser` / `adminpass`
+*   **Teacher:** `teacheruser` / `teacherpass`
+*   **Student:** `studentuser` / `studentpass`
+*   **Keycloak Console:** `keycloakadmin` / `keycloakadmin`
 
 
