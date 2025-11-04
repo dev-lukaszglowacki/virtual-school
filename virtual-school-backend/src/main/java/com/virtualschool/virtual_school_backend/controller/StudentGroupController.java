@@ -1,20 +1,23 @@
 package com.virtualschool.virtual_school_backend.controller;
 
+import com.virtualschool.virtual_school_backend.dto.StudentDTO;
+import com.virtualschool.virtual_school_backend.dto.StudentGroupDTO;
 import com.virtualschool.virtual_school_backend.model.Student;
 import com.virtualschool.virtual_school_backend.model.StudentGroup;
 import com.virtualschool.virtual_school_backend.repository.StudentGroupRepository;
 import com.virtualschool.virtual_school_backend.repository.StudentRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import com.virtualschool.virtual_school_backend.dto.StudentDTO;
-import com.virtualschool.virtual_school_backend.dto.StudentGroupDTO;
+import com.virtualschool.virtual_school_backend.service.KeycloakService;
+import org.keycloak.representations.idm.UserRepresentation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @RestController
@@ -23,11 +26,15 @@ public class StudentGroupController {
 
     private static final Logger logger = LoggerFactory.getLogger(StudentGroupController.class);
 
-    @Autowired
-    private StudentGroupRepository studentGroupRepository;
+    private final StudentGroupRepository studentGroupRepository;
+    private final StudentRepository studentRepository;
+    private final KeycloakService keycloakService;
 
-    @Autowired
-    private StudentRepository studentRepository;
+    public StudentGroupController(StudentGroupRepository studentGroupRepository, StudentRepository studentRepository, KeycloakService keycloakService) {
+        this.studentGroupRepository = studentGroupRepository;
+        this.studentRepository = studentRepository;
+        this.keycloakService = keycloakService;
+    }
 
     @GetMapping
     @PreAuthorize("hasAnyRole('admin', 'teacher', 'student')")
@@ -35,14 +42,27 @@ public class StudentGroupController {
         List<StudentGroup> groupsWithStudents = studentGroupRepository.findAllWithStudents();
         logger.info("Groups fetched from repository: {}", groupsWithStudents);
 
+        // Get all unique student keycloakIds from all groups
+        List<String> allKeycloakIds = groupsWithStudents.stream()
+                .flatMap(group -> group.getStudents().stream())
+                .map(Student::getKeycloakId)
+                .distinct()
+                .collect(Collectors.toList());
+
+        // Fetch all user details from keycloak in one go
+        Map<String, UserRepresentation> userMap = keycloakService.getUsersDetails(allKeycloakIds).stream()
+                .collect(Collectors.toMap(UserRepresentation::getId, Function.identity()));
+
+        // Map groups to DTOs, enriching student data
         List<StudentGroupDTO> groups = groupsWithStudents.stream()
                 .map(group -> {
                     Set<StudentDTO> studentDTOs = group.getStudents().stream()
-                            .map(student -> new StudentDTO(student.getId(), student.getFirstName(), student.getLastName(), student.getEmail()))
+                            .map(student -> new StudentDTO(student, userMap.get(student.getKeycloakId())))
                             .collect(Collectors.toSet());
                     return new StudentGroupDTO(group.getId(), group.getName(), studentDTOs);
                 })
                 .collect(Collectors.toList());
+
         logger.info("Groups being returned: {}", groups);
         return groups;
     }

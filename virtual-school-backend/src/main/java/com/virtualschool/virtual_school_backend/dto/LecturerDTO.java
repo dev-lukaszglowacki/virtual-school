@@ -1,21 +1,21 @@
 package com.virtualschool.virtual_school_backend.dto;
 
-import com.virtualschool.virtual_school_backend.model.Student;
+import com.virtualschool.virtual_school_backend.model.Lecturer;
 import org.keycloak.representations.idm.UserRepresentation;
 
-public class StudentDTO {
+public class LecturerDTO {
     private Long id;
     private String keycloakId;
     private String firstName;
     private String lastName;
     private String email;
 
-    public StudentDTO() {
+    public LecturerDTO() {
     }
 
-    public StudentDTO(Student student, UserRepresentation userRepresentation) {
-        this.id = student.getId();
-        this.keycloakId = student.getKeycloakId();
+    public LecturerDTO(Lecturer lecturer, UserRepresentation userRepresentation) {
+        this.id = lecturer.getId();
+        this.keycloakId = lecturer.getKeycloakId();
         this.firstName = userRepresentation.getFirstName();
         this.lastName = userRepresentation.getLastName();
         this.email = userRepresentation.getEmail();

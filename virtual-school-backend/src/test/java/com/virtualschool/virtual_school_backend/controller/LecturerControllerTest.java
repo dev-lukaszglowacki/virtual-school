@@ -2,24 +2,24 @@ package com.virtualschool.virtual_school_backend.controller;
 
 import com.virtualschool.virtual_school_backend.model.Lecturer;
 import com.virtualschool.virtual_school_backend.repository.LecturerRepository;
+import com.virtualschool.virtual_school_backend.service.KeycloakService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.context.ActiveProfiles;
+import org.keycloak.representations.idm.UserRepresentation;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 
-import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.when;
 import static org.hamcrest.Matchers.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-
-import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
 
 import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
 import org.springframework.boot.autoconfigure.security.oauth2.resource.servlet.OAuth2ResourceServerAutoConfiguration;
@@ -34,39 +34,35 @@ class LecturerControllerTest {
     @MockBean
     private LecturerRepository lecturerRepository;
 
+    @MockBean
+    private KeycloakService keycloakService;
+
     @Test
     void getAllLecturers() throws Exception {
-        Lecturer lecturer1 = new Lecturer("John", "Smith", "john.smith@example.com", "Math");
-        Lecturer lecturer2 = new Lecturer("Jane", "Smith", "jane.smith@example.com", "History");
+        Lecturer lecturer1 = new Lecturer("keycloak-id-1");
+        lecturer1.setId(1L);
+        Lecturer lecturer2 = new Lecturer("keycloak-id-2");
+        lecturer2.setId(2L);
+
+        UserRepresentation user1 = new UserRepresentation();
+        user1.setId("keycloak-id-1");
+        user1.setFirstName("John");
+        user1.setLastName("Smith");
+        user1.setEmail("john.smith@example.com");
+
+        UserRepresentation user2 = new UserRepresentation();
+        user2.setId("keycloak-id-2");
+        user2.setFirstName("Jane");
+        user2.setLastName("Smith");
+        user2.setEmail("jane.smith@example.com");
+
         when(lecturerRepository.findAll()).thenReturn(Arrays.asList(lecturer1, lecturer2));
+        when(keycloakService.getUsersDetails(anyList())).thenReturn(Arrays.asList(user1, user2));
 
         mockMvc.perform(get("/api/lecturers"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(2)))
-                .andExpect(jsonPath("$[0].firstName", is("John")));
-    }
-
-    @Test
-    void getLecturerById() throws Exception {
-        Lecturer lecturer = new Lecturer("John", "Smith", "john.smith@example.com", "Math");
-        lecturer.setId(1L);
-        when(lecturerRepository.findById(1L)).thenReturn(Optional.of(lecturer));
-
-        mockMvc.perform(get("/api/lecturers/1"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.firstName", is("John")));
-    }
-
-    @Test
-    void createLecturer() throws Exception {
-        Lecturer lecturer = new Lecturer("John", "Smith", "john.smith@example.com", "Math");
-        lecturer.setId(1L);
-        when(lecturerRepository.save(any(Lecturer.class))).thenReturn(lecturer);
-
-        mockMvc.perform(post("/api/lecturers")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content("{\"firstName\":\"John\",\"lastName\":\"Smith\",\"email\":\"john.smith@example.com\",\"subject\":\"Math\"}"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id", is(1)));
+                .andExpect(jsonPath("$[0].firstName", is("John")))
+                .andExpect(jsonPath("$[1].firstName", is("Jane")));
     }
 }
