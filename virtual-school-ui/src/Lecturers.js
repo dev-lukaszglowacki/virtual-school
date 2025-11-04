@@ -1,13 +1,12 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import keycloak from './keycloak';
-import LecturerForm from './LecturerForm';
 
 function Lecturers() {
   const [lecturers, setLecturers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [editingLecturer, setEditingLecturer] = useState(null);
-  const [isCreating, setIsCreating] = useState(false);
+  const navigate = useNavigate();
 
   const fetchLecturers = async () => {
     try {
@@ -33,47 +32,8 @@ function Lecturers() {
     fetchLecturers();
   }, []);
 
-  const handleSave = async (lecturer) => {
-    const url = lecturer.id ? `/api/lecturers/${lecturer.id}` : '/api/lecturers';
-    const method = lecturer.id ? 'PUT' : 'POST';
-
-    try {
-      const response = await fetch(url, {
-        method,
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${keycloak.token}`,
-        },
-        body: JSON.stringify(lecturer),
-      });
-      if (!response.ok) {
-        throw new Error('Failed to save lecturer');
-      }
-      setEditingLecturer(null);
-      setIsCreating(false);
-      fetchLecturers();
-    } catch (error) {
-      setError(error);
-    }
-  };
-
-  const handleDelete = async (id) => {
-    if (window.confirm('Are you sure you want to delete this lecturer?')) {
-      try {
-        const response = await fetch(`/api/lecturers/${id}`, {
-          method: 'DELETE',
-          headers: {
-            Authorization: `Bearer ${keycloak.token}`,
-          },
-        });
-        if (!response.ok) {
-          throw new Error('Failed to delete lecturer');
-        }
-        fetchLecturers();
-      } catch (error) {
-        setError(error);
-      }
-    }
+  const handleAddLecturer = () => {
+    navigate('/create-user', { state: { role: 'teacher' } });
   };
 
   if (loading) return <div>Loading...</div>;
@@ -82,15 +42,10 @@ function Lecturers() {
   return (
     <div>
       <h2>Lecturers</h2>
-      <button onClick={() => { setIsCreating(true); setEditingLecturer(null); }}>Add Lecturer</button>
-      
-      {(isCreating || editingLecturer) && (
-        <LecturerForm 
-          lecturer={editingLecturer} 
-          onSave={handleSave} 
-        />
+      {keycloak.hasRealmRole('admin') && (
+        <button onClick={handleAddLecturer}>Add Lecturer</button>
       )}
-
+      
       <table>
         <thead>
           <tr>
@@ -98,8 +53,6 @@ function Lecturers() {
             <th>First Name</th>
             <th>Last Name</th>
             <th>Email</th>
-            <th>Subject</th>
-            <th>Actions</th>
           </tr>
         </thead>
         <tbody>
@@ -109,11 +62,6 @@ function Lecturers() {
               <td>{lecturer.firstName}</td>
               <td>{lecturer.lastName}</td>
               <td>{lecturer.email}</td>
-              <td>{lecturer.subject}</td>
-              <td>
-                <button onClick={() => { setEditingLecturer(lecturer); setIsCreating(false); }}>Edit</button>
-                <button onClick={() => handleDelete(lecturer.id)}>Delete</button>
-              </td>
             </tr>
           ))}
         </tbody>

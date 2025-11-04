@@ -3,7 +3,8 @@ package com.virtualschool.virtual_school_backend.controller;
 import com.virtualschool.virtual_school_backend.dto.StudentDTO;
 import com.virtualschool.virtual_school_backend.model.Student;
 import com.virtualschool.virtual_school_backend.repository.StudentRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.virtualschool.virtual_school_backend.service.KeycloakService;
+import org.keycloak.representations.idm.UserRepresentation;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -12,21 +13,34 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/students")
 public class StudentController {
 
-    @Autowired
-    private StudentRepository studentRepository;
+    private final StudentRepository studentRepository;
+    private final KeycloakService keycloakService;
+
+    public StudentController(StudentRepository studentRepository, KeycloakService keycloakService) {
+        this.studentRepository = studentRepository;
+        this.keycloakService = keycloakService;
+    }
 
     @GetMapping
-    @PreAuthorize("hasAnyRole('admin', 'teacher', 'student')")
+    @PreAuthorize("hasAnyRole('admin', 'teacher')")
     @Transactional(readOnly = true)
     public List<StudentDTO> getAllStudents() {
-        return studentRepository.findAll().stream()
-                .map(StudentDTO::new)
+        List<Student> students = studentRepository.findAll();
+        List<String> keycloakIds = students.stream().map(Student::getKeycloakId).collect(Collectors.toList());
+        
+        Map<String, UserRepresentation> userMap = keycloakService.getUsersDetails(keycloakIds).stream()
+                .collect(Collectors.toMap(UserRepresentation::getId, Function.identity()));
+
+        return students.stream()
+                .map(student -> new StudentDTO(student, userMap.get(student.getKeycloakId())))
                 .collect(Collectors.toList());
     }
 
@@ -34,48 +48,11 @@ public class StudentController {
     @PreAuthorize("hasRole('student')")
     @Transactional(readOnly = true)
     public ResponseEntity<StudentDTO> getMe(@AuthenticationPrincipal Jwt jwt) {
-        String email = jwt.getClaimAsString("email");
-        return studentRepository.findByEmail(email)
-                .map(student -> ResponseEntity.ok(new StudentDTO(student)))
-                .orElse(ResponseEntity.notFound().build());
-    }
-
-    @GetMapping("/{id}")
-    @PreAuthorize("hasAnyRole('admin', 'teacher', 'student')")
-    @Transactional(readOnly = true)
-    public ResponseEntity<StudentDTO> getStudentById(@PathVariable Long id) {
-        return studentRepository.findById(id)
-                .map(student -> ResponseEntity.ok(new StudentDTO(student)))
-                .orElse(ResponseEntity.notFound().build());
-    }
-
-    @PostMapping
-    @PreAuthorize("hasRole('admin')")
-    public Student createStudent(@RequestBody Student student) {
-        return studentRepository.save(student);
-    }
-
-    @PutMapping("/{id}")
-    @PreAuthorize("hasRole('admin')")
-    public ResponseEntity<StudentDTO> updateStudent(@PathVariable Long id, @RequestBody Student studentDetails) {
-        return studentRepository.findById(id)
+        String keycloakId = jwt.getSubject();
+        return studentRepository.findByKeycloakId(keycloakId)
                 .map(student -> {
-                    student.setFirstName(studentDetails.getFirstName());
-                    student.setLastName(studentDetails.getLastName());
-                    student.setEmail(studentDetails.getEmail());
-                    Student updatedStudent = studentRepository.save(student);
-                    return ResponseEntity.ok(new StudentDTO(updatedStudent));
-                })
-                .orElse(ResponseEntity.notFound().build());
-    }
-
-    @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('admin')")
-    public ResponseEntity<Void> deleteStudent(@PathVariable Long id) {
-        return studentRepository.findById(id)
-                .map(student -> {
-                    studentRepository.delete(student);
-                    return ResponseEntity.ok().<Void>build();
+                    UserRepresentation user = keycloakService.getUsersDetails(List.of(keycloakId)).get(0);
+                    return ResponseEntity.ok(new StudentDTO(student, user));
                 })
                 .orElse(ResponseEntity.notFound().build());
     }

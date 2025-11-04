@@ -1,39 +1,34 @@
 import React, { useState, useEffect } from 'react';
 import keycloak from './keycloak';
 
-function MyTimetable() {
-  const [myGroups, setMyGroups] = useState([]);
-  const [allLessonPlans, setAllLessonPlans] = useState([]);
+function TeacherTimetable() {
+  const [myLessonPlans, setMyLessonPlans] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
     const fetchData = async () => {
+      if (!keycloak.hasRealmRole('teacher')) {
+        setLoading(false);
+        return;
+      }
       try {
-        // Fetch current student's data
-        const meResponse = await fetch('/api/students/me', {
+        // Fetch current lecturer's data
+        const meResponse = await fetch('/api/lecturers/me', {
           headers: { Authorization: `Bearer ${keycloak.token}` },
         });
-        if (!meResponse.ok) throw new Error('Could not fetch student data');
+        if (!meResponse.ok) throw new Error('Could not fetch lecturer data');
         const meData = await meResponse.json();
 
-        // Fetch all groups and filter them to find the student's groups
-        const groupsResponse = await fetch('/api/groups', {
-          headers: { Authorization: `Bearer ${keycloak.token}` },
-        });
-        if (!groupsResponse.ok) throw new Error('Could not fetch groups');
-        const groupsData = await groupsResponse.json();
-        console.log('groupsData:', groupsData);
-        const studentGroups = groupsData.filter(group => group.students.some(student => student.id === meData.id));
-        setMyGroups(studentGroups);
-
-        // Fetch all lesson plans
+        // Fetch all lesson plans and filter them
         const plansResponse = await fetch('/api/lesson-plans', {
           headers: { Authorization: `Bearer ${keycloak.token}` },
         });
         if (!plansResponse.ok) throw new Error('Could not fetch lesson plans');
-        const plansData = await plansResponse.json();
-        setAllLessonPlans(plansData);
+        const allPlans = await plansResponse.json();
+        
+        const filteredPlans = allPlans.filter(plan => plan.lecturer?.id === meData.id);
+        setMyLessonPlans(filteredPlans);
 
       } catch (err) {
         setError(err);
@@ -42,20 +37,13 @@ function MyTimetable() {
       }
     };
 
-    if (keycloak.hasRealmRole('student')) {
-      fetchData();
-    } else {
-      setLoading(false);
-    }
+    fetchData();
   }, []);
-
-  const myGroupIds = new Set(myGroups.map(g => g.id));
-  const filteredPlans = allLessonPlans.filter(plan => myGroupIds.has(plan.studentGroup?.id));
 
   const days = ['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY'];
   const timetable = days.map(day => ({
     day,
-    lessons: filteredPlans
+    lessons: myLessonPlans
       .filter(plan => plan.dayOfWeek === day)
       .sort((a, b) => a.startTime.localeCompare(b.startTime)),
   }));
@@ -74,7 +62,7 @@ function MyTimetable() {
               lessons.map(plan => (
                 <div key={plan.id} style={{ border: '1px solid #ccc', margin: '5px', padding: '10px' }}>
                   <strong>{plan.subject?.name}</strong><br />
-                  <em>{plan.lecturer?.firstName} {plan.lecturer?.lastName}</em><br />
+                  <em>Group: {plan.studentGroup?.name}</em><br />
                   <span>{plan.startTime} - {plan.endTime}</span>
                 </div>
               ))
@@ -88,4 +76,4 @@ function MyTimetable() {
   );
 }
 
-export default MyTimetable;
+export default TeacherTimetable;

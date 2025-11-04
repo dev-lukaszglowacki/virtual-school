@@ -40,7 +40,7 @@ class LessonPlanControllerTest {
     @Test
     void getAllLessonPlans() throws Exception {
         Subject subject = new Subject("Math", "Mathematics");
-        Lecturer lecturer = new Lecturer("John", "Doe", "john.doe@example.com", "Math");
+        Lecturer lecturer = new Lecturer("test-lecturer-keycloak-id");
         StudentGroup group = new StudentGroup("Class A");
         LessonPlan plan1 = new LessonPlan();
         plan1.setId(1L);
@@ -62,8 +62,7 @@ class LessonPlanControllerTest {
     @Test
     void createLessonPlan() throws Exception {
         Subject subject = new Subject("Math", "Mathematics");
-        subject.setId(1L);
-        Lecturer lecturer = new Lecturer("John", "Doe", "john.doe@example.com", "Math");
+        Lecturer lecturer = new Lecturer("test-lecturer-keycloak-id");
         lecturer.setId(2L);
         StudentGroup group = new StudentGroup("Class A");
         group.setId(3L);

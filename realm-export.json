@@ -31,6 +31,14 @@
           }
         }
       ]
+    },
+    {
+      "clientId": "admin-cli",
+      "secret": "my-secret",
+      "protocol": "openid-connect",
+      "publicClient": false,
+      "serviceAccountsEnabled": true,
+      "directAccessGrantsEnabled": true
     }
   ],
   "roles": {
@@ -68,7 +76,12 @@
           "value": "adminpass"
         }
       ],
-      "realmRoles" : [ "default-roles-virtual-school", "offline_access", "uma_authorization", "admin" ]
+      "realmRoles" : [ "default-roles-virtual-school", "offline_access", "uma_authorization", "admin" ],
+      "clientRoles": {
+        "realm-management": [
+          "realm-admin"
+        ]
+      }
     },
     {
       "username": "teacheruser",

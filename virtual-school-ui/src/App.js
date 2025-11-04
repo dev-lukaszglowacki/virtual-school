@@ -7,6 +7,8 @@ import LessonPlans from './LessonPlans';
 import Subjects from './Subjects';
 import Groups from './Groups';
 import MyTimetable from './MyTimetable';
+import UserForm from './UserForm';
+import TeacherTimetable from './TeacherTimetable';
 
 function App({ keycloak }) {
   return (
@@ -45,11 +47,23 @@ function App({ keycloak }) {
                       Lesson Plans
                     </Link>
                   </li>
+                  <li className="nav-item">
+                    <Link to="/create-user" className="nav-links">
+                      Create User
+                    </Link>
+                  </li>
                 </>
               )}
               {keycloak.hasRealmRole('student') && (
                 <li className="nav-item">
                   <Link to="/my-timetable" className="nav-links">
+                    My Timetable
+                  </Link>
+                </li>
+              )}
+              {keycloak.hasRealmRole('teacher') && (
+                <li className="nav-item">
+                  <Link to="/teacher-timetable" className="nav-links">
                     My Timetable
                   </Link>
                 </li>
@@ -78,6 +92,8 @@ function App({ keycloak }) {
               <Route path="/groups" element={<Groups />} />
               <Route path="/lesson-plans" element={<LessonPlans />} />
               <Route path="/my-timetable" element={<MyTimetable />} />
+              <Route path="/create-user" element={<UserForm />} />
+              <Route path="/teacher-timetable" element={<TeacherTimetable />} />
               <Route path="/" element={<h2>Welcome to the Virtual School Management System.</h2>} />
             </Routes>
           ) : (
