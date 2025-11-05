@@ -8,7 +8,7 @@ const MyClasses = () => {
     useEffect(() => {
         const fetchSubjects = async () => {
             try {
-                const response = await fetch('http://localhost:8080/api/subjects/my-subjects', {
+                const response = await fetch('/api/subjects/my-subjects', {
                     headers: {
                         'Authorization': `Bearer ${keycloak.token}`
                     }

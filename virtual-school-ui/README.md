@@ -36,7 +36,7 @@ npm start
 
 This will open the application in your default browser at `http://localhost:3000`. The page will automatically reload if you make edits.
 
-**Note:** The frontend is configured to proxy API requests to the backend at `http://backend:8080` (as defined in `package.json`). For this to work, the backend service must be running and accessible. This is handled automatically when using the main Docker Compose setup.
+**Note:** The frontend development server is configured to proxy API requests to the backend. All fetch requests to relative paths (e.g., `/api/students`) will be forwarded to the `proxy` URL defined in `package.json`. This is handled automatically when using the main Docker Compose setup.
 
 ### Building for Production
 
