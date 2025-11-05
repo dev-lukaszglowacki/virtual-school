@@ -7,7 +7,7 @@ const MyGrades = () => {
     useEffect(() => {
         const fetchGrades = async () => {
             try {
-                const response = await fetch('http://localhost:8080/grades/student', {
+                const response = await fetch('/api/grades/student', {
                     headers: {
                         'Authorization': `Bearer ${keycloak.token}`
                     }

@@ -16,7 +16,7 @@ Key features include:
 The backend is a RESTful API built with **Java** and **Spring Boot**.
 
 *   **User Management:** Uses Keycloak as the single source of truth for user identity. The application database stores a `keycloakId` to link local data (like a student's group) to a Keycloak user.
-*   **API:** Enriches data on the fly. When user lists are requested, it fetches records from its own database and combines them with fresh user details (name, email) from the Keycloak API.
+*   **API:** Enriches data on the fly. All endpoints are available under the `/api` path. When user lists are requested, it fetches records from its own database and combines them with fresh user details (name, email) from the Keycloak API.
 *   **Security:** Endpoints are secured using **Spring Security** as an OAuth 2.0 Resource Server.
 *   **Database:** **PostgreSQL** with **Spring Data JPA**.
 
