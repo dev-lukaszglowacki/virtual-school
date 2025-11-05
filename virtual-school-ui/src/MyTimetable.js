@@ -23,7 +23,6 @@ function MyTimetable() {
         });
         if (!groupsResponse.ok) throw new Error('Could not fetch groups');
         const groupsData = await groupsResponse.json();
-        console.log('groupsData:', groupsData);
         const studentGroups = groupsData.filter(group => group.students.some(student => student.id === meData.id));
         setMyGroups(studentGroups);
 

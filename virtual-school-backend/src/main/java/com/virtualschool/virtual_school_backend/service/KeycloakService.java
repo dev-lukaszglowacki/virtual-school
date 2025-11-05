@@ -68,4 +68,9 @@ public class KeycloakService {
                 .map(id -> keycloak.realm("virtual-school").users().get(id).toRepresentation())
                 .collect(Collectors.toList());
     }
+
+    public UserRepresentation findByUsername(String username) {
+        List<UserRepresentation> users = keycloak.realm("virtual-school").users().search(username, true);
+        return users.stream().findFirst().orElse(null);
+    }
 }
