@@ -8,7 +8,13 @@ services:
     networks:
       - keycloak-network
     depends_on:
-      - backend
+      backend:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   backend:
     build: ./virtual-school-backend
@@ -21,6 +27,11 @@ services:
         condition: service_healthy
       keycloak-db:
         condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   keycloak:
     image: quay.io/keycloak/keycloak:latest
@@ -46,6 +57,11 @@ services:
     command:
       - "start-dev"
       - "--import-realm"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health/ready"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   keycloak-db:
     image: postgres:latest
@@ -90,11 +106,19 @@ services:
     ports:
       - "8083:8080"
     depends_on:
-      - keycloak-db
-      - backend-db
+      keycloak-db:
+        condition: service_healthy
+      backend-db:
+        condition: service_healthy
     networks:
       - keycloak-network
     restart: always
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
 
 networks:
   keycloak-network:

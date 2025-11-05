@@ -1,9 +1,7 @@
 package com.virtualschool.virtual_school_backend.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
+
 import java.util.Objects;
 
 @Entity
@@ -14,12 +12,17 @@ public class Subject {
     private String name;
     private String description;
 
+    @ManyToOne
+    @JoinColumn(name = "lecturer_id")
+    private Lecturer lecturer;
+
     public Subject() {
     }
 
-    public Subject(String name, String description) {
+    public Subject(String name, String description, Lecturer lecturer) {
         this.name = name;
         this.description = description;
+        this.lecturer = lecturer;
     }
 
     public Long getId() {
@@ -44,6 +47,14 @@ public class Subject {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public Lecturer getLecturer() {
+        return lecturer;
+    }
+
+    public void setLecturer(Lecturer lecturer) {
+        this.lecturer = lecturer;
     }
 
     @Override
