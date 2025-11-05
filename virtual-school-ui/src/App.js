@@ -9,6 +9,9 @@ import Groups from './Groups';
 import MyTimetable from './MyTimetable';
 import UserForm from './UserForm';
 import TeacherTimetable from './TeacherTimetable';
+import MyGrades from './MyGrades';
+import MyClasses from './MyClasses';
+import ClassGrades from './ClassGrades';
 
 function App({ keycloak }) {
   return (
@@ -55,18 +58,32 @@ function App({ keycloak }) {
                 </>
               )}
               {keycloak.hasRealmRole('student') && (
-                <li className="nav-item">
-                  <Link to="/my-timetable" className="nav-links">
-                    My Timetable
-                  </Link>
-                </li>
+                <>
+                  <li className="nav-item">
+                    <Link to="/my-timetable" className="nav-links">
+                      My Timetable
+                    </Link>
+                  </li>
+                  <li className="nav-item">
+                    <Link to="/my-grades" className="nav-links">
+                      My Grades
+                    </Link>
+                  </li>
+                </>
               )}
               {keycloak.hasRealmRole('teacher') && (
-                <li className="nav-item">
-                  <Link to="/teacher-timetable" className="nav-links">
-                    My Timetable
-                  </Link>
-                </li>
+                <>
+                  <li className="nav-item">
+                    <Link to="/teacher-timetable" className="nav-links">
+                      My Timetable
+                    </Link>
+                  </li>
+                  <li className="nav-item">
+                    <Link to="/my-classes" className="nav-links">
+                      My Classes
+                    </Link>
+                  </li>
+                </>
               )}
             </ul>
             <div className="nav-login">
@@ -94,6 +111,9 @@ function App({ keycloak }) {
               <Route path="/my-timetable" element={<MyTimetable />} />
               <Route path="/create-user" element={<UserForm />} />
               <Route path="/teacher-timetable" element={<TeacherTimetable />} />
+              <Route path="/my-grades" element={<MyGrades />} />
+              <Route path="/my-classes" element={<MyClasses />} />
+              <Route path="/my-classes/:subjectId" element={<ClassGrades />} />
               <Route path="/" element={<h2>Welcome to the Virtual School Management System.</h2>} />
             </Routes>
           ) : (
@@ -108,5 +128,3 @@ function App({ keycloak }) {
 }
 
 export default App;
-
-

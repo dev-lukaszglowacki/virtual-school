@@ -2,7 +2,6 @@ package com.virtualschool.virtual_school_backend.controller;
 
 import com.virtualschool.virtual_school_backend.model.LessonPlan;
 import com.virtualschool.virtual_school_backend.repository.LessonPlanRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -13,8 +12,11 @@ import java.util.List;
 @RequestMapping("/api/lesson-plans")
 public class LessonPlanController {
 
-    @Autowired
-    private LessonPlanRepository lessonPlanRepository;
+    private final LessonPlanRepository lessonPlanRepository;
+
+    public LessonPlanController(LessonPlanRepository lessonPlanRepository) {
+        this.lessonPlanRepository = lessonPlanRepository;
+    }
 
     @GetMapping
     @PreAuthorize("hasAnyRole('admin', 'teacher', 'student')")

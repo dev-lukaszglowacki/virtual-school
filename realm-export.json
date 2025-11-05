@@ -70,6 +70,9 @@
     {
       "username": "adminuser",
       "enabled": true,
+      "firstName": "Admin",
+      "lastName": "User",
+      "email": "admin.user@example.com",
       "credentials": [
         {
           "type": "password",
@@ -86,6 +89,9 @@
     {
       "username": "teacheruser",
       "enabled": true,
+      "firstName": "Teacher",
+      "lastName": "User",
+      "email": "teacher.user@example.com",
       "credentials": [
         {
           "type": "password",
@@ -99,6 +105,9 @@
     {
       "username": "studentuser",
       "enabled": true,
+      "firstName": "Student",
+      "lastName": "User",
+      "email": "student.user@example.com",
       "credentials": [
         {
           "type": "password",

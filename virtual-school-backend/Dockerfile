@@ -5,5 +5,6 @@ RUN mvn clean install -DskipTests
 
 # Package stage
 FROM openjdk:17-slim
+RUN apt-get update && apt-get install -y curl
 COPY --from=build /target/*.jar app.jar
 ENTRYPOINT ["java","-jar","/app.jar"]
