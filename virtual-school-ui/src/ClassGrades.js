@@ -11,7 +11,7 @@ const ClassGrades = () => {
     useEffect(() => {
         const fetchStudents = async () => {
             try {
-                const response = await fetch(`http://localhost:8080/api/subjects/${subjectId}/students`, {
+                const response = await fetch(`/api/subjects/${subjectId}/students`, {
                     headers: {
                         'Authorization': `Bearer ${keycloak.token}`
                     }
@@ -29,7 +29,7 @@ const ClassGrades = () => {
 
         const fetchGrades = async () => {
             try {
-                const response = await fetch(`http://localhost:8080/grades/subject/${subjectId}`, {
+                const response = await fetch(`/api/grades/subject/${subjectId}`, {
                     headers: {
                         'Authorization': `Bearer ${keycloak.token}`
                     }
@@ -65,7 +65,7 @@ const ClassGrades = () => {
 
     const handleAddGrade = async (studentId) => {
         try {
-            const response = await fetch('http://localhost:8080/grades', {
+            const response = await fetch('/api/grades', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
