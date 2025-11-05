@@ -1,6 +1,8 @@
 package com.virtualschool.virtual_school_backend.controller;
 
 import com.virtualschool.virtual_school_backend.model.Subject;
+import com.virtualschool.virtual_school_backend.repository.LecturerRepository;
+import com.virtualschool.virtual_school_backend.repository.LessonPlanRepository;
 import com.virtualschool.virtual_school_backend.repository.SubjectRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,13 +34,19 @@ class SubjectControllerTest {
     @MockBean
     private SubjectRepository subjectRepository;
 
+    @MockBean
+    private LecturerRepository lecturerRepository;
+
+    @MockBean
+    private LessonPlanRepository lessonPlanRepository;
+
     @Test
     void getAllSubjects() throws Exception {
-        Subject subject1 = new Subject("Mathematics", "Advanced Calculus");
-        Subject subject2 = new Subject("History", "World History");
+        Subject subject1 = new Subject("Mathematics", "Advanced Calculus", null);
+        Subject subject2 = new Subject("History", "World History", null);
         when(subjectRepository.findAll()).thenReturn(Arrays.asList(subject1, subject2));
 
-        mockMvc.perform(get("/api/subjects"))
+        mockMvc.perform(get("/subjects"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(2)))
                 .andExpect(jsonPath("$[0].name", is("Mathematics")));
@@ -46,22 +54,22 @@ class SubjectControllerTest {
 
     @Test
     void getSubjectById() throws Exception {
-        Subject subject = new Subject("Mathematics", "Advanced Calculus");
+        Subject subject = new Subject("Mathematics", "Advanced Calculus", null);
         subject.setId(1L);
         when(subjectRepository.findById(1L)).thenReturn(Optional.of(subject));
 
-        mockMvc.perform(get("/api/subjects/1"))
+        mockMvc.perform(get("/subjects/1"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name", is("Mathematics")));
     }
 
     @Test
     void createSubject() throws Exception {
-        Subject subject = new Subject("Mathematics", "Advanced Calculus");
+        Subject subject = new Subject("Mathematics", "Advanced Calculus", null);
         subject.setId(1L);
         when(subjectRepository.save(any(Subject.class))).thenReturn(subject);
 
-        mockMvc.perform(post("/api/subjects")
+        mockMvc.perform(post("/subjects")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("{\"name\":\"Mathematics\",\"description\":\"Advanced Calculus\"}"))
                 .andExpect(status().isOk())
