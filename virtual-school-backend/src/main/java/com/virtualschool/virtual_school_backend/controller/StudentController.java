@@ -8,12 +8,14 @@ import org.keycloak.representations.idm.UserRepresentation;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import com.virtualschool.virtual_school_backend.model.StudentGroup;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -54,6 +56,16 @@ public class StudentController {
                     UserRepresentation user = keycloakService.getUsersDetails(List.of(keycloakId)).get(0);
                     return ResponseEntity.ok(new StudentDTO(student, user));
                 })
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    @GetMapping("/me/groups")
+    @PreAuthorize("hasRole('student')")
+    @Transactional(readOnly = true)
+    public ResponseEntity<Set<StudentGroup>> getMyGroups(@AuthenticationPrincipal Jwt jwt) {
+        String keycloakId = jwt.getSubject();
+        return studentRepository.findByKeycloakId(keycloakId)
+                .map(student -> ResponseEntity.ok(student.getGroups()))
                 .orElse(ResponseEntity.notFound().build());
     }
 }

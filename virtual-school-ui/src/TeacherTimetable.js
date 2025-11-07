@@ -27,7 +27,7 @@ function TeacherTimetable() {
         if (!plansResponse.ok) throw new Error('Could not fetch lesson plans');
         const allPlans = await plansResponse.json();
         
-        const filteredPlans = allPlans.filter(plan => plan.lecturer?.id === meData.id);
+        const filteredPlans = allPlans.filter(plan => plan.lecturerName === `${meData.firstName} ${meData.lastName}`);
         setMyLessonPlans(filteredPlans);
 
       } catch (err) {
@@ -61,8 +61,8 @@ function TeacherTimetable() {
             {lessons.length > 0 ? (
               lessons.map(plan => (
                 <div key={plan.id} style={{ border: '1px solid #ccc', margin: '5px', padding: '10px' }}>
-                  <strong>{plan.subject?.name}</strong><br />
-                  <em>Group: {plan.studentGroup?.name}</em><br />
+                  <strong>{plan.subjectName}</strong><br />
+                  <em>Group: {plan.studentGroupName}</em><br />
                   <span>{plan.startTime} - {plan.endTime}</span>
                 </div>
               ))

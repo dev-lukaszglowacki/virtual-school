@@ -119,9 +119,9 @@ function LessonPlans() {
         <tbody>
           {lessonPlans.map((plan) => (
             <tr key={plan.id}>
-              <td>{plan.subject?.name}</td>
-              <td>{plan.lecturer?.firstName} {plan.lecturer?.lastName}</td>
-              <td>{plan.studentGroup?.name}</td>
+              <td>{plan.subjectName}</td>
+              <td>{plan.lecturerName}</td>
+              <td>{plan.studentGroupName}</td>
               <td>{plan.dayOfWeek}</td>
               <td>{plan.startTime} - {plan.endTime}</td>
               <td>
@@ -148,17 +148,18 @@ function LessonPlanForm({ plan, subjects, lecturers, groups, onSave }) {
 
   useEffect(() => {
     if (plan) {
+      const lecturer = lecturers.find(l => `${l.firstName} ${l.lastName}` === plan.lecturerName);
       setFormData({
         id: plan.id,
-        subjectId: plan.subject?.id || '',
-        lecturerId: plan.lecturer?.id || '',
-        groupId: plan.studentGroup?.id || '',
+        subjectId: subjects.find(s => s.name === plan.subjectName)?.id || '',
+        lecturerId: lecturer?.id || '',
+        groupId: groups.find(g => g.name === plan.studentGroupName)?.id || '',
         dayOfWeek: plan.dayOfWeek || 'MONDAY',
         startTime: plan.startTime || '',
         endTime: plan.endTime || '',
       });
     }
-  }, [plan]);
+  }, [plan, subjects, lecturers, groups]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;

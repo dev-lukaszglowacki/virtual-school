@@ -10,21 +10,13 @@ function MyTimetable() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // Fetch current student's data
-        const meResponse = await fetch('/api/students/me', {
+        // Fetch current student's groups
+        const groupsResponse = await fetch('/api/students/me/groups', {
           headers: { Authorization: `Bearer ${keycloak.token}` },
         });
-        if (!meResponse.ok) throw new Error('Could not fetch student data');
-        const meData = await meResponse.json();
-
-        // Fetch all groups and filter them to find the student's groups
-        const groupsResponse = await fetch('/api/groups', {
-          headers: { Authorization: `Bearer ${keycloak.token}` },
-        });
-        if (!groupsResponse.ok) throw new Error('Could not fetch groups');
+        if (!groupsResponse.ok) throw new Error('Could not fetch student groups');
         const groupsData = await groupsResponse.json();
-        const studentGroups = groupsData.filter(group => group.students.some(student => student.id === meData.id));
-        setMyGroups(studentGroups);
+        setMyGroups(groupsData);
 
         // Fetch all lesson plans
         const plansResponse = await fetch('/api/lesson-plans', {
@@ -48,8 +40,8 @@ function MyTimetable() {
     }
   }, []);
 
-  const myGroupIds = new Set(myGroups.map(g => g.id));
-  const filteredPlans = allLessonPlans.filter(plan => myGroupIds.has(plan.studentGroup?.id));
+  const myGroupNames = new Set(myGroups.map(g => g.name));
+  const filteredPlans = allLessonPlans.filter(plan => myGroupNames.has(plan.studentGroupName));
 
   const days = ['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY'];
   const timetable = days.map(day => ({
@@ -72,8 +64,8 @@ function MyTimetable() {
             {lessons.length > 0 ? (
               lessons.map(plan => (
                 <div key={plan.id} style={{ border: '1px solid #ccc', margin: '5px', padding: '10px' }}>
-                  <strong>{plan.subject?.name}</strong><br />
-                  <em>{plan.lecturer?.firstName} {plan.lecturer?.lastName}</em><br />
+                  <strong>{plan.subjectName}</strong><br />
+                  <em>{plan.lecturerName}</em><br />
                   <span>{plan.startTime} - {plan.endTime}</span>
                 </div>
               ))
