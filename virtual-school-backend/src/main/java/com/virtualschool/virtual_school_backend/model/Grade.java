@@ -21,13 +21,14 @@ public class Grade {
     @JoinColumn(name = "lecturer_id", nullable = false)
     private Lecturer lecturer;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private Integer grade;
+    private GradeValue grade;
 
     public Grade() {
     }
 
-    public Grade(Student student, Subject subject, Lecturer lecturer, Integer grade) {
+    public Grade(Student student, Subject subject, Lecturer lecturer, GradeValue grade) {
         this.student = student;
         this.subject = subject;
         this.lecturer = lecturer;
@@ -66,11 +67,11 @@ public class Grade {
         this.lecturer = lecturer;
     }
 
-    public Integer getGrade() {
+    public GradeValue getGrade() {
         return grade;
     }
 
-    public void setGrade(Integer grade) {
+    public void setGrade(GradeValue grade) {
         this.grade = grade;
     }
 }
