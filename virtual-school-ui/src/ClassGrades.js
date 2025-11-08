@@ -114,11 +114,18 @@ const ClassGrades = () => {
                                 {grades[student.id] && grades[student.id].map(grade => grade.grade).join(', ')}
                             </td>
                             <td>
-                                <input
-                                    type="number"
+                                <select
                                     value={newGrades[student.id] || ''}
-                                    onChange={(e) => handleGradeChange(student.id, e.target.value)}
-                                />
+                                    onChange={(e) => handleGradeChange(student.id, parseInt(e.target.value, 10))}
+                                >
+                                    <option value="">Select grade</option>
+                                    <option value="1">1</option>
+                                    <option value="2">2</option>
+                                    <option value="3">3</option>
+                                    <option value="4">4</option>
+                                    <option value="5">5</option>
+                                    <option value="6">6</option>
+                                </select>
                                 <button onClick={() => handleAddGrade(student.id)}>Add Grade</button>
                             </td>
                         </tr>
