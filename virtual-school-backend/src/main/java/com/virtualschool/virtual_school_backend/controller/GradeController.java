@@ -5,6 +5,7 @@ import com.virtualschool.virtual_school_backend.model.Grade;
 import com.virtualschool.virtual_school_backend.model.Lecturer;
 import com.virtualschool.virtual_school_backend.model.Student;
 import com.virtualschool.virtual_school_backend.model.Subject;
+import com.virtualschool.virtual_school_backend.model.GradeValue;
 import com.virtualschool.virtual_school_backend.repository.GradeRepository;
 import com.virtualschool.virtual_school_backend.repository.LecturerRepository;
 import com.virtualschool.virtual_school_backend.repository.StudentRepository;
@@ -59,7 +60,7 @@ public class GradeController {
         Subject subject = subjectRepository.findById(gradeDTO.getSubjectId())
                 .orElseThrow(() -> new RuntimeException("Subject not found"));
 
-        Grade grade = new Grade(student, subject, lecturer, gradeDTO.getGrade());
+        Grade grade = new Grade(student, subject, lecturer, GradeValue.fromValue(gradeDTO.getGrade()));
         grade = gradeRepository.save(grade);
 
         return new ResponseEntity<>(toDTO(grade), HttpStatus.CREATED);
@@ -107,7 +108,7 @@ public class GradeController {
                 grade.getSubject().getName(),
                 grade.getLecturer().getId(),
                 lecturerUser.getFirstName() + " " + lecturerUser.getLastName(),
-                grade.getGrade()
+                grade.getGrade().getValue()
         );
     }
 }
