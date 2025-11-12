@@ -73,6 +73,7 @@
       "firstName": "Admin",
       "lastName": "User",
       "email": "admin.user@example.com",
+      "emailVerified": true,
       "credentials": [
         {
           "type": "password",
@@ -92,6 +93,7 @@
       "firstName": "Teacher",
       "lastName": "User",
       "email": "teacher.user@example.com",
+      "emailVerified": true,
       "credentials": [
         {
           "type": "password",
@@ -108,6 +110,7 @@
       "firstName": "Student",
       "lastName": "User",
       "email": "student.user@example.com",
+      "emailVerified": true,
       "credentials": [
         {
           "type": "password",
