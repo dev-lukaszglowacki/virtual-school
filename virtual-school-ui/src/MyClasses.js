@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import keycloak from './keycloak';
+import { List, ListItem, ListItemText, Paper, Typography } from '@mui/material';
 
 const MyClasses = () => {
     const [subjects, setSubjects] = useState([]);
@@ -28,16 +29,16 @@ const MyClasses = () => {
     }, []);
 
     return (
-        <div>
-            <h2>My Classes</h2>
-            <ul>
+        <Paper sx={{ p: 2 }}>
+            <Typography variant="h4" sx={{ mb: 2 }}>My Classes</Typography>
+            <List component="nav">
                 {subjects.map(subject => (
-                    <li key={subject.id}>
-                        <Link to={`/my-classes/${subject.id}`}>{subject.name}</Link>
-                    </li>
+                    <ListItem button component={Link} to={`/my-classes/${subject.id}`} key={subject.id}>
+                        <ListItemText primary={subject.name} />
+                    </ListItem>
                 ))}
-            </ul>
-        </div>
+            </List>
+        </Paper>
     );
 };
 

@@ -1,14 +1,50 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import keycloak from './keycloak';
+import {
+    Table,
+    TableBody,
+    TableCell,
+    TableContainer,
+    TableHead,
+    TableRow,
+    Paper,
+    Button,
+    Typography,
+    Box,
+    Select,
+    MenuItem,
+    FormControl,
+    InputLabel
+} from '@mui/material';
 
 const ClassGrades = () => {
     const { subjectId } = useParams();
     const [students, setStudents] = useState([]);
     const [grades, setGrades] = useState({});
     const [newGrades, setNewGrades] = useState({});
+    const [subjectName, setSubjectName] = useState('');
+
 
     useEffect(() => {
+        const fetchSubjectDetails = async () => {
+            try {
+                const response = await fetch(`/api/subjects/${subjectId}`, {
+                    headers: {
+                        'Authorization': `Bearer ${keycloak.token}`
+                    }
+                });
+                if(response.ok) {
+                    const data = await response.json();
+                    setSubjectName(data.name);
+                } else {
+                    console.error('Failed to fetch subject details');
+                }
+            } catch (error) {
+                console.error('Error fetching subject details:', error);
+            }
+        };
+
         const fetchStudents = async () => {
             try {
                 const response = await fetch(`/api/subjects/${subjectId}/students`, {
@@ -52,6 +88,7 @@ const ClassGrades = () => {
             }
         };
 
+        fetchSubjectDetails();
         fetchStudents();
         fetchGrades();
     }, [subjectId]);
@@ -96,43 +133,52 @@ const ClassGrades = () => {
     };
 
     return (
-        <div>
-            <h2>Class Grades</h2>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Student</th>
-                        <th>Grades</th>
-                        <th>New Grade</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {students.map(student => (
-                        <tr key={student.id}>
-                            <td>{student.firstName} {student.lastName}</td>
-                            <td>
-                                {grades[student.id] && grades[student.id].map(grade => grade.grade).join(', ')}
-                            </td>
-                            <td>
-                                <select
-                                    value={newGrades[student.id] || ''}
-                                    onChange={(e) => handleGradeChange(student.id, parseInt(e.target.value, 10))}
-                                >
-                                    <option value="">Select grade</option>
-                                    <option value="1">1</option>
-                                    <option value="2">2</option>
-                                    <option value="3">3</option>
-                                    <option value="4">4</option>
-                                    <option value="5">5</option>
-                                    <option value="6">6</option>
-                                </select>
-                                <button onClick={() => handleAddGrade(student.id)}>Add Grade</button>
-                            </td>
-                        </tr>
-                    ))}
-                </tbody>
-            </table>
-        </div>
+        <Paper sx={{ p: 2 }}>
+            <Typography variant="h4" sx={{ mb: 2 }}>Grades for {subjectName}</Typography>
+            <TableContainer>
+                <Table>
+                    <TableHead>
+                        <TableRow>
+                            <TableCell>Student</TableCell>
+                            <TableCell>Grades</TableCell>
+                            <TableCell>New Grade</TableCell>
+                        </TableRow>
+                    </TableHead>
+                    <TableBody>
+                        {students.map(student => (
+                            <TableRow key={student.id}>
+                                <TableCell>{student.firstName} {student.lastName}</TableCell>
+                                <TableCell>
+                                    {grades[student.id] && grades[student.id].map(grade => grade.grade).join(', ')}
+                                </TableCell>
+                                <TableCell>
+                                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                                        <FormControl size="small" sx={{ mr: 1, minWidth: 120 }}>
+                                            <InputLabel>Grade</InputLabel>
+                                            <Select
+                                                value={newGrades[student.id] || ''}
+                                                onChange={(e) => handleGradeChange(student.id, e.target.value)}
+                                                label="Grade"
+                                            >
+                                                <MenuItem value=""><em>Select grade</em></MenuItem>
+                                                {[1, 2, 3, 4, 5, 6].map(g => <MenuItem key={g} value={g}>{g}</MenuItem>)}
+                                            </Select>
+                                        </FormControl>
+                                        <Button 
+                                            variant="contained" 
+                                            onClick={() => handleAddGrade(student.id)} 
+                                            disabled={!newGrades[student.id]}
+                                        >
+                                            Add Grade
+                                        </Button>
+                                    </Box>
+                                </TableCell>
+                            </TableRow>
+                        ))}
+                    </TableBody>
+                </Table>
+            </TableContainer>
+        </Paper>
     );
 };
 

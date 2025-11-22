@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import keycloak from './keycloak';
+import { Grid, Card, CardContent, Typography, Paper, CircularProgress, Box } from '@mui/material';
 
 function MyTimetable() {
   const [myGroups, setMyGroups] = useState([]);
@@ -10,7 +11,6 @@ function MyTimetable() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // Fetch current student's groups
         const groupsResponse = await fetch('/api/students/me/groups', {
           headers: { Authorization: `Bearer ${keycloak.token}` },
         });
@@ -18,7 +18,6 @@ function MyTimetable() {
         const groupsData = await groupsResponse.json();
         setMyGroups(groupsData);
 
-        // Fetch all lesson plans
         const plansResponse = await fetch('/api/lesson-plans', {
           headers: { Authorization: `Bearer ${keycloak.token}` },
         });
@@ -51,31 +50,41 @@ function MyTimetable() {
       .sort((a, b) => a.startTime.localeCompare(b.startTime)),
   }));
 
-  if (loading) return <div>Loading...</div>;
-  if (error) return <div>Error: {error.message}</div>;
+  if (loading) return <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}><CircularProgress /></Box>;
+  if (error) return <Typography color="error">Error: {error.message}</Typography>;
 
   return (
-    <div>
-      <h2>My Timetable</h2>
-      <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-around' }}>
+    <Paper sx={{ p: 2 }}>
+      <Typography variant="h4" sx={{ mb: 2 }}>My Timetable</Typography>
+      <Grid container spacing={2}>
         {timetable.map(({ day, lessons }) => (
-          <div key={day} style={{ width: '18%' }}>
-            <h3>{day}</h3>
-            {lessons.length > 0 ? (
-              lessons.map(plan => (
-                <div key={plan.id} style={{ border: '1px solid #ccc', margin: '5px', padding: '10px' }}>
-                  <strong>{plan.subjectName}</strong><br />
-                  <em>{plan.lecturerName}</em><br />
-                  <span>{plan.startTime} - {plan.endTime}</span>
-                </div>
-              ))
-            ) : (
-              <p>No lessons scheduled.</p>
-            )}
-          </div>
+          <Grid item xs={12} sm={6} md={2.4} key={day}>
+            <Paper elevation={2} sx={{ p: 2, height: '100%' }}>
+              <Typography variant="h6" align="center">{day}</Typography>
+              {lessons.length > 0 ? (
+                lessons.map(plan => (
+                  <Card key={plan.id} sx={{ mb: 1 }}>
+                    <CardContent>
+                      <Typography variant="body1" component="div">
+                        <strong>{plan.subjectName}</strong>
+                      </Typography>
+                      <Typography sx={{ mb: 1.5 }} color="text.secondary">
+                        {plan.lecturerName}
+                      </Typography>
+                      <Typography variant="body2">
+                        {plan.startTime} - {plan.endTime}
+                      </Typography>
+                    </CardContent>
+                  </Card>
+                ))
+              ) : (
+                <Typography sx={{ mt: 2 }} align="center">No lessons scheduled.</Typography>
+              )}
+            </Paper>
+          </Grid>
         ))}
-      </div>
-    </div>
+      </Grid>
+    </Paper>
   );
 }
 
