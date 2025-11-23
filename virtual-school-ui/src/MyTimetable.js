@@ -11,7 +11,7 @@ function MyTimetable() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const groupsResponse = await fetch('/api/students/me/groups', {
+        const groupsResponse = await fetch('/api/users/me/groups', {
           headers: { Authorization: `Bearer ${keycloak.token}` },
         });
         if (!groupsResponse.ok) throw new Error('Could not fetch student groups');
