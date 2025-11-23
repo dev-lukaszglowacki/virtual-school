@@ -12,17 +12,12 @@ public class Subject {
     private String name;
     private String description;
 
-    @ManyToOne
-    @JoinColumn(name = "lecturer_id")
-    private Lecturer lecturer;
-
     public Subject() {
     }
 
-    public Subject(String name, String description, Lecturer lecturer) {
+    public Subject(String name, String description) {
         this.name = name;
         this.description = description;
-        this.lecturer = lecturer;
     }
 
     public Long getId() {
@@ -49,13 +44,7 @@ public class Subject {
         this.description = description;
     }
 
-    public Lecturer getLecturer() {
-        return lecturer;
-    }
 
-    public void setLecturer(Lecturer lecturer) {
-        this.lecturer = lecturer;
-    }
 
     @Override
     public boolean equals(Object o) {

@@ -1,9 +1,9 @@
 package com.virtualschool.virtual_school_backend.service;
 
-import com.virtualschool.virtual_school_backend.model.Lecturer;
-import com.virtualschool.virtual_school_backend.model.Student;
-import com.virtualschool.virtual_school_backend.repository.LecturerRepository;
-import com.virtualschool.virtual_school_backend.repository.StudentRepository;
+import com.virtualschool.virtual_school_backend.model.Role;
+import com.virtualschool.virtual_school_backend.model.User;
+import com.virtualschool.virtual_school_backend.repository.UserRepository;
+
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.resource.UserResource;
 import org.keycloak.representations.idm.CredentialRepresentation;
@@ -20,13 +20,11 @@ import java.util.stream.Collectors;
 public class KeycloakService {
 
     private final Keycloak keycloak;
-    private final StudentRepository studentRepository;
-    private final LecturerRepository lecturerRepository;
+    private final UserRepository userRepository;
 
-    public KeycloakService(Keycloak keycloak, StudentRepository studentRepository, LecturerRepository lecturerRepository) {
+    public KeycloakService(Keycloak keycloak, UserRepository userRepository) {
         this.keycloak = keycloak;
-        this.studentRepository = studentRepository;
-        this.lecturerRepository = lecturerRepository;
+        this.userRepository = userRepository;
     }
 
     public void createUser(String username, String password, String firstName, String lastName, String email, String roleName) {
@@ -55,11 +53,11 @@ public class KeycloakService {
         userResource.roles().realmLevel().add(Collections.singletonList(role));
 
         if ("student".equalsIgnoreCase(roleName)) {
-            Student student = new Student(userId);
-            studentRepository.save(student);
+            User student = new User(userId, Role.STUDENT);
+            userRepository.save(student);
         } else if ("teacher".equalsIgnoreCase(roleName)) {
-            Lecturer lecturer = new Lecturer(userId);
-            lecturerRepository.save(lecturer);
+            User lecturer = new User(userId, Role.LECTURER);
+            userRepository.save(lecturer);
         }
     }
 

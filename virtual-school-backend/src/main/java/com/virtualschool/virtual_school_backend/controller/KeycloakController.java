@@ -18,7 +18,7 @@ public class KeycloakController {
         this.keycloakService = keycloakService;
     }
 
-    @PostMapping
+    @PostMapping("/create")
     public ResponseEntity<Void> createUser(@RequestBody UserDTO userDTO) {
         keycloakService.createUser(
                 userDTO.getUsername(),

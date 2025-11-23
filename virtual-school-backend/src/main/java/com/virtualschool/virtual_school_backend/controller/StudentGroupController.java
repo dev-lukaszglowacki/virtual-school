@@ -1,11 +1,11 @@
 package com.virtualschool.virtual_school_backend.controller;
 
-import com.virtualschool.virtual_school_backend.dto.StudentDTO;
 import com.virtualschool.virtual_school_backend.dto.StudentGroupDTO;
-import com.virtualschool.virtual_school_backend.model.Student;
+import com.virtualschool.virtual_school_backend.dto.UserDTO;
 import com.virtualschool.virtual_school_backend.model.StudentGroup;
+import com.virtualschool.virtual_school_backend.model.User;
 import com.virtualschool.virtual_school_backend.repository.StudentGroupRepository;
-import com.virtualschool.virtual_school_backend.repository.StudentRepository;
+import com.virtualschool.virtual_school_backend.repository.UserRepository;
 import com.virtualschool.virtual_school_backend.service.KeycloakService;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.slf4j.Logger;
@@ -27,12 +27,12 @@ public class StudentGroupController {
     private static final Logger logger = LoggerFactory.getLogger(StudentGroupController.class);
 
     private final StudentGroupRepository studentGroupRepository;
-    private final StudentRepository studentRepository;
+    private final UserRepository userRepository;
     private final KeycloakService keycloakService;
 
-    public StudentGroupController(StudentGroupRepository studentGroupRepository, StudentRepository studentRepository, KeycloakService keycloakService) {
+    public StudentGroupController(StudentGroupRepository studentGroupRepository, UserRepository userRepository, KeycloakService keycloakService) {
         this.studentGroupRepository = studentGroupRepository;
-        this.studentRepository = studentRepository;
+        this.userRepository = userRepository;
         this.keycloakService = keycloakService;
     }
 
@@ -44,8 +44,8 @@ public class StudentGroupController {
 
         // Get all unique student keycloakIds from all groups
         List<String> allKeycloakIds = groupsWithStudents.stream()
-                .flatMap(group -> group.getStudents().stream())
-                .map(Student::getKeycloakId)
+                .flatMap(group -> group.getUsers().stream())
+                .map(User::getKeycloakId)
                 .distinct()
                 .collect(Collectors.toList());
 
@@ -56,8 +56,8 @@ public class StudentGroupController {
         // Map groups to DTOs, enriching student data
         List<StudentGroupDTO> groups = groupsWithStudents.stream()
                 .map(group -> {
-                    Set<StudentDTO> studentDTOs = group.getStudents().stream()
-                            .map(student -> new StudentDTO(student, userMap.get(student.getKeycloakId())))
+                    Set<UserDTO> studentDTOs = group.getUsers().stream()
+                            .map(user -> new UserDTO(user, userMap.get(user.getKeycloakId())))
                             .collect(Collectors.toSet());
                     return new StudentGroupDTO(group.getId(), group.getName(), studentDTOs);
                 })
@@ -98,14 +98,14 @@ public class StudentGroupController {
     @PostMapping("/{groupId}/students/{studentId}")
     @PreAuthorize("hasRole('admin')")
     public ResponseEntity<StudentGroup> addStudentToGroup(@PathVariable Long groupId, @PathVariable Long studentId) {
-        Student student = studentRepository.findById(studentId).orElse(null);
+        User student = userRepository.findById(studentId).orElse(null);
         StudentGroup group = studentGroupRepository.findById(groupId).orElse(null);
 
         if (student == null || group == null) {
             return ResponseEntity.notFound().build();
         }
 
-        group.getStudents().add(student);
+        group.getUsers().add(student);
         studentGroupRepository.save(group);
         return ResponseEntity.ok(group);
     }
@@ -113,14 +113,14 @@ public class StudentGroupController {
     @DeleteMapping("/{groupId}/students/{studentId}")
     @PreAuthorize("hasRole('admin')")
     public ResponseEntity<StudentGroup> removeStudentFromGroup(@PathVariable Long groupId, @PathVariable Long studentId) {
-        Student student = studentRepository.findById(studentId).orElse(null);
+        User student = userRepository.findById(studentId).orElse(null);
         StudentGroup group = studentGroupRepository.findById(groupId).orElse(null);
 
         if (student == null || group == null) {
             return ResponseEntity.notFound().build();
         }
 
-        group.getStudents().remove(student);
+        group.getUsers().remove(student);
         studentGroupRepository.save(group);
         return ResponseEntity.ok(group);
     }

@@ -1,11 +1,10 @@
 package com.virtualschool.virtual_school_backend.controller;
 
-import com.virtualschool.virtual_school_backend.dto.StudentDTO;
-import com.virtualschool.virtual_school_backend.model.Lecturer;
+import com.virtualschool.virtual_school_backend.dto.UserDTO;
 import com.virtualschool.virtual_school_backend.model.LessonPlan;
-import com.virtualschool.virtual_school_backend.model.Student;
+import com.virtualschool.virtual_school_backend.model.User;
 import com.virtualschool.virtual_school_backend.model.Subject;
-import com.virtualschool.virtual_school_backend.repository.LecturerRepository;
+import com.virtualschool.virtual_school_backend.repository.UserRepository;
 import com.virtualschool.virtual_school_backend.repository.LessonPlanRepository;
 import com.virtualschool.virtual_school_backend.repository.SubjectRepository;
 import com.virtualschool.virtual_school_backend.service.KeycloakService;
@@ -13,7 +12,6 @@ import org.keycloak.representations.idm.UserRepresentation;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Collections;
@@ -25,17 +23,14 @@ import java.util.stream.Collectors;
 public class SubjectController {
 
     private final SubjectRepository subjectRepository;
-
-    private final LecturerRepository lecturerRepository;
-
+    private final UserRepository userRepository;
     private final LessonPlanRepository lessonPlanRepository;
-
     private final KeycloakService keycloakService;
 
-    public SubjectController(SubjectRepository subjectRepository, LecturerRepository lecturerRepository,
-        LessonPlanRepository lessonPlanRepository, KeycloakService keycloakService) {
+    public SubjectController(SubjectRepository subjectRepository, UserRepository userRepository,
+                             LessonPlanRepository lessonPlanRepository, KeycloakService keycloakService) {
         this.subjectRepository = subjectRepository;
-        this.lecturerRepository = lecturerRepository;
+        this.userRepository = userRepository;
         this.lessonPlanRepository = lessonPlanRepository;
         this.keycloakService = keycloakService;
     }
@@ -85,33 +80,37 @@ public class SubjectController {
 
     @GetMapping("/my-subjects")
     @PreAuthorize("hasRole('teacher')")
-    public ResponseEntity<List<Subject>> getMySubjects() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+    public ResponseEntity<List<Subject>> getMySubjects(Authentication authentication) {
         String keycloakId = authentication.getName();
+        User user = userRepository.findByKeycloakId(keycloakId)
+                .orElseThrow(() -> new RuntimeException("Lecturer not found for Keycloak ID: " + keycloakId));
 
-        Lecturer lecturer = lecturerRepository.findByKeycloakId(keycloakId)
-                .orElseThrow(() -> new RuntimeException("Lecturer not found"));
-
-        return ResponseEntity.ok(subjectRepository.findByLecturerId(lecturer.getId()));
-    }
-
-    @GetMapping("/{id}/students")
-    @PreAuthorize("hasRole('teacher')")
-    public ResponseEntity<List<StudentDTO>> getStudentsForSubject(@PathVariable Long id) {
-        List<LessonPlan> lessonPlans = lessonPlanRepository.findBySubjectId(id);
-        List<Student> students = lessonPlans.stream()
-                .flatMap(lessonPlan -> lessonPlan.getStudentGroup().getStudents().stream())
+        List<LessonPlan> lessonPlans = lessonPlanRepository.findByUserId(user.getId());
+        List<Subject> subjects = lessonPlans.stream()
+                .map(LessonPlan::getSubject)
                 .distinct()
                 .collect(Collectors.toList());
 
-        List<StudentDTO> studentDTOs = students.stream()
-                .map(student -> {
-                    UserRepresentation user = keycloakService.getUsersDetails(Collections.singletonList(student.getKeycloakId())).get(0);
-                    return new StudentDTO(student, user);
+        return ResponseEntity.ok(subjects);
+    }
+
+    @GetMapping("/{id}/users")
+    @PreAuthorize("hasRole('teacher')")
+    public ResponseEntity<List<UserDTO>> getUsersForSubject(@PathVariable Long id) {
+        List<LessonPlan> lessonPlans = lessonPlanRepository.findBySubjectId(id);
+        List<User> users = lessonPlans.stream()
+                .flatMap(lessonPlan -> lessonPlan.getStudentGroup().getUsers().stream())
+                .distinct()
+                .collect(Collectors.toList());
+
+        List<UserDTO> userDTOs = users.stream()
+                .map(user -> {
+                    UserRepresentation userRepresentation = keycloakService.getUsersDetails(Collections.singletonList(user.getKeycloakId())).get(0);
+                    return new UserDTO(user, userRepresentation);
                 })
                 .collect(Collectors.toList());
 
-        return ResponseEntity.ok(studentDTOs);
+        return ResponseEntity.ok(userDTOs);
     }
 }
 

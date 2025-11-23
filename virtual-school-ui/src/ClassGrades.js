@@ -20,7 +20,7 @@ import {
 
 const ClassGrades = () => {
     const { subjectId } = useParams();
-    const [students, setStudents] = useState([]);
+    const [users, setUsers] = useState([]);
     const [grades, setGrades] = useState({});
     const [newGrades, setNewGrades] = useState({});
     const [subjectName, setSubjectName] = useState('');
@@ -59,7 +59,25 @@ const ClassGrades = () => {
                     console.error('Failed to fetch students');
                 }
             } catch (error) {
-                console.error('Error fetching students:', error);
+                console.error('Error fetching subject details:', error);
+            }
+        };
+
+        const fetchUsers = async () => {
+            try {
+                const response = await fetch(`/api/subjects/${subjectId}/users`, {
+                    headers: {
+                        'Authorization': `Bearer ${keycloak.token}`
+                    }
+                });
+                if (response.ok) {
+                    const data = await response.json();
+                    setUsers(data);
+                } else {
+                    console.error('Failed to fetch users');
+                }
+            } catch (error) {
+                console.error('Error fetching users:', error);
             }
         };
 
@@ -164,9 +182,9 @@ const ClassGrades = () => {
                                                 {[1, 2, 3, 4, 5, 6].map(g => <MenuItem key={g} value={g}>{g}</MenuItem>)}
                                             </Select>
                                         </FormControl>
-                                        <Button 
-                                            variant="contained" 
-                                            onClick={() => handleAddGrade(student.id)} 
+                                        <Button
+                                            variant="contained"
+                                            onClick={() => handleAddGrade(student.id)}
                                             disabled={!newGrades[student.id]}
                                         >
                                             Add Grade

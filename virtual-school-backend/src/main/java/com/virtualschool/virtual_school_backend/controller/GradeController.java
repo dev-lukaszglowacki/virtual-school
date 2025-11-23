@@ -2,13 +2,11 @@ package com.virtualschool.virtual_school_backend.controller;
 
 import com.virtualschool.virtual_school_backend.dto.GradeDTO;
 import com.virtualschool.virtual_school_backend.model.Grade;
-import com.virtualschool.virtual_school_backend.model.Lecturer;
-import com.virtualschool.virtual_school_backend.model.Student;
+import com.virtualschool.virtual_school_backend.model.User;
 import com.virtualschool.virtual_school_backend.model.Subject;
 import com.virtualschool.virtual_school_backend.model.GradeValue;
 import com.virtualschool.virtual_school_backend.repository.GradeRepository;
-import com.virtualschool.virtual_school_backend.repository.LecturerRepository;
-import com.virtualschool.virtual_school_backend.repository.StudentRepository;
+import com.virtualschool.virtual_school_backend.repository.UserRepository;
 import com.virtualschool.virtual_school_backend.repository.SubjectRepository;
 import com.virtualschool.virtual_school_backend.service.KeycloakService;
 import org.keycloak.representations.idm.UserRepresentation;
@@ -27,22 +25,15 @@ import java.util.stream.Collectors;
 public class GradeController {
 
     private final GradeRepository gradeRepository;
-
-    private final StudentRepository studentRepository;
-
+    private final UserRepository userRepository;
     private final SubjectRepository subjectRepository;
-
-    private final LecturerRepository lecturerRepository;
-
     private final KeycloakService keycloakService;
 
-    public GradeController(GradeRepository gradeRepository, StudentRepository studentRepository,
-        SubjectRepository subjectRepository, LecturerRepository lecturerRepository,
-        KeycloakService keycloakService) {
+    public GradeController(GradeRepository gradeRepository, UserRepository userRepository,
+                           SubjectRepository subjectRepository, KeycloakService keycloakService) {
         this.gradeRepository = gradeRepository;
-        this.studentRepository = studentRepository;
+        this.userRepository = userRepository;
         this.subjectRepository = subjectRepository;
-        this.lecturerRepository = lecturerRepository;
         this.keycloakService = keycloakService;
     }
 
@@ -51,10 +42,10 @@ public class GradeController {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String keycloakId = authentication.getName();
 
-        Lecturer lecturer = lecturerRepository.findByKeycloakId(keycloakId)
+        User lecturer = userRepository.findByKeycloakId(keycloakId)
                 .orElseThrow(() -> new RuntimeException("Lecturer not found"));
 
-        Student student = studentRepository.findById(gradeDTO.getStudentId())
+        User student = userRepository.findById(gradeDTO.getStudentId())
                 .orElseThrow(() -> new RuntimeException("Student not found"));
 
         Subject subject = subjectRepository.findById(gradeDTO.getSubjectId())
@@ -71,7 +62,7 @@ public class GradeController {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String keycloakId = authentication.getName();
 
-        Student student = studentRepository.findByKeycloakId(keycloakId)
+        User student = userRepository.findByKeycloakId(keycloakId)
                 .orElseThrow(() -> new RuntimeException("Student not found"));
 
         List<Grade> grades = gradeRepository.findByStudentId(student.getId());
@@ -83,7 +74,7 @@ public class GradeController {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String keycloakId = authentication.getName();
 
-        Lecturer lecturer = lecturerRepository.findByKeycloakId(keycloakId)
+        User lecturer = userRepository.findByKeycloakId(keycloakId)
                 .orElseThrow(() -> new RuntimeException("Lecturer not found"));
 
         List<Grade> grades = gradeRepository.findByLecturerId(lecturer.getId());

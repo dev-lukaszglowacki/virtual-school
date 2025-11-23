@@ -31,7 +31,7 @@ const UserForm = () => {
         event.preventDefault();
         const user = { username, password, firstName, lastName, email, role };
 
-        fetch('/api/users', {
+        fetch('/api/users/create', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

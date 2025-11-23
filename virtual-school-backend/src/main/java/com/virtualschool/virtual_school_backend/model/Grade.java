@@ -11,7 +11,7 @@ public class Grade {
 
     @ManyToOne
     @JoinColumn(name = "student_id", nullable = false)
-    private Student student;
+    private User student;
 
     @ManyToOne
     @JoinColumn(name = "subject_id", nullable = false)
@@ -19,7 +19,7 @@ public class Grade {
 
     @ManyToOne
     @JoinColumn(name = "lecturer_id", nullable = false)
-    private Lecturer lecturer;
+    private User lecturer;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -28,7 +28,7 @@ public class Grade {
     public Grade() {
     }
 
-    public Grade(Student student, Subject subject, Lecturer lecturer, GradeValue grade) {
+    public Grade(User student, Subject subject, User lecturer, GradeValue grade) {
         this.student = student;
         this.subject = subject;
         this.lecturer = lecturer;
@@ -43,11 +43,11 @@ public class Grade {
         this.id = id;
     }
 
-    public Student getStudent() {
+    public User getStudent() {
         return student;
     }
 
-    public void setStudent(Student student) {
+    public void setStudent(User student) {
         this.student = student;
     }
 
@@ -59,11 +59,11 @@ public class Grade {
         this.subject = subject;
     }
 
-    public Lecturer getLecturer() {
+    public User getLecturer() {
         return lecturer;
     }
 
-    public void setLecturer(Lecturer lecturer) {
+    public void setLecturer(User lecturer) {
         this.lecturer = lecturer;
     }
 

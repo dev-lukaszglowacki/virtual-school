@@ -1,18 +1,22 @@
 package com.virtualschool.virtual_school_backend.controller;
 
-import com.virtualschool.virtual_school_backend.model.Student;
+import com.virtualschool.virtual_school_backend.model.Role;
 import com.virtualschool.virtual_school_backend.model.StudentGroup;
+import com.virtualschool.virtual_school_backend.model.User;
 import com.virtualschool.virtual_school_backend.repository.StudentGroupRepository;
-import com.virtualschool.virtual_school_backend.repository.StudentRepository;
+import com.virtualschool.virtual_school_backend.repository.UserRepository;
 import com.virtualschool.virtual_school_backend.service.KeycloakService;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.context.ActiveProfiles;
 import org.keycloak.representations.idm.UserRepresentation;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -29,36 +33,44 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
 import org.springframework.boot.autoconfigure.security.oauth2.resource.servlet.OAuth2ResourceServerAutoConfiguration;
 
-@WebMvcTest(controllers = StudentGroupController.class, excludeAutoConfiguration = {SecurityAutoConfiguration.class, OAuth2ResourceServerAutoConfiguration.class})
+@WebMvcTest(excludeAutoConfiguration = {SecurityAutoConfiguration.class, OAuth2ResourceServerAutoConfiguration.class})
 @ActiveProfiles("test")
 class StudentGroupControllerTest {
 
-    @Autowired
     private MockMvc mockMvc;
 
-    @MockBean
+    @Mock
     private StudentGroupRepository studentGroupRepository;
 
-    @MockBean
-    private StudentRepository studentRepository;
+    @Mock
+    private UserRepository userRepository;
 
-    @MockBean
+    @Mock
     private KeycloakService keycloakService;
+
+    @InjectMocks
+    private StudentGroupController studentGroupController;
+
+    @BeforeEach
+    void setUp() {
+        MockitoAnnotations.openMocks(this);
+        mockMvc = MockMvcBuilders.standaloneSetup(studentGroupController).build();
+    }
 
     @Test
     void getAllGroups() throws Exception {
-        Student student1 = new Student("keycloak-id-1");
+        User student1 = new User("keycloak-id-1", Role.STUDENT);
         student1.setId(1L);
-        Student student2 = new Student("keycloak-id-2");
+        User student2 = new User("keycloak-id-2", Role.STUDENT);
         student2.setId(2L);
 
         StudentGroup group1 = new StudentGroup("Class A");
         group1.setId(10L);
-        group1.setStudents(new HashSet<>(Arrays.asList(student1)));
+        group1.setUsers(new HashSet<>(Arrays.asList(student1)));
 
         StudentGroup group2 = new StudentGroup("Class B");
         group2.setId(20L);
-        group2.setStudents(new HashSet<>(Arrays.asList(student2)));
+        group2.setUsers(new HashSet<>(Arrays.asList(student2)));
 
         UserRepresentation user1 = new UserRepresentation();
         user1.setId("keycloak-id-1");
@@ -101,11 +113,11 @@ class StudentGroupControllerTest {
 
     @Test
     void addStudentToGroup() throws Exception {
-        Student student = new Student("keycloak-id-1");
+        User student = new User("keycloak-id-1", Role.STUDENT);
         student.setId(1L);
         StudentGroup group = new StudentGroup("Class A");
         group.setId(2L);
-        group.setStudents(new HashSet<>(Arrays.asList(student)));
+        group.setUsers(new HashSet<>(Arrays.asList(student)));
 
         UserRepresentation user = new UserRepresentation();
         user.setId("keycloak-id-1");
@@ -113,7 +125,7 @@ class StudentGroupControllerTest {
         user.setLastName("Doe");
         user.setEmail("john.doe@example.com");
 
-        when(studentRepository.findById(1L)).thenReturn(Optional.of(student));
+        when(userRepository.findById(1L)).thenReturn(Optional.of(student));
         when(studentGroupRepository.findById(2L)).thenReturn(Optional.of(group));
         when(studentGroupRepository.save(any(StudentGroup.class))).thenReturn(group);
         when(keycloakService.getUsersDetails(anyList())).thenReturn(List.of(user));
@@ -126,13 +138,13 @@ class StudentGroupControllerTest {
 
     @Test
     void removeStudentFromGroup() throws Exception {
-        Student student = new Student("keycloak-id-1");
+        User student = new User("keycloak-id-1", Role.STUDENT);
         student.setId(1L);
         StudentGroup group = new StudentGroup("Class A");
         group.setId(2L);
-        group.setStudents(new HashSet<>(Arrays.asList(student)));
+        group.setUsers(new HashSet<>(Arrays.asList(student)));
 
-        when(studentRepository.findById(1L)).thenReturn(Optional.of(student));
+        when(userRepository.findById(1L)).thenReturn(Optional.of(student));
         when(studentGroupRepository.findById(2L)).thenReturn(Optional.of(group));
         when(studentGroupRepository.save(any(StudentGroup.class))).thenReturn(group);
 
