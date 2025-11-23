@@ -47,24 +47,6 @@ const ClassGrades = () => {
 
         const fetchStudents = async () => {
             try {
-                const response = await fetch(`/api/subjects/${subjectId}/students`, {
-                    headers: {
-                        'Authorization': `Bearer ${keycloak.token}`
-                    }
-                });
-                if (response.ok) {
-                    const data = await response.json();
-                    setStudents(data);
-                } else {
-                    console.error('Failed to fetch students');
-                }
-            } catch (error) {
-                console.error('Error fetching subject details:', error);
-            }
-        };
-
-        const fetchUsers = async () => {
-            try {
                 const response = await fetch(`/api/subjects/${subjectId}/users`, {
                     headers: {
                         'Authorization': `Bearer ${keycloak.token}`
@@ -74,10 +56,10 @@ const ClassGrades = () => {
                     const data = await response.json();
                     setUsers(data);
                 } else {
-                    console.error('Failed to fetch users');
+                    console.error('Failed to fetch students');
                 }
             } catch (error) {
-                console.error('Error fetching users:', error);
+                console.error('Error fetching subject details:', error);
             }
         };
 
@@ -163,7 +145,7 @@ const ClassGrades = () => {
                         </TableRow>
                     </TableHead>
                     <TableBody>
-                        {students.map(student => (
+                        {users.map(student => (
                             <TableRow key={student.id}>
                                 <TableCell>{student.firstName} {student.lastName}</TableCell>
                                 <TableCell>
