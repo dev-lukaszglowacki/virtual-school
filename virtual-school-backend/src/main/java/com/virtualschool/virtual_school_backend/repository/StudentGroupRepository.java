@@ -6,7 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import java.util.List;
 
 public interface StudentGroupRepository extends JpaRepository<StudentGroup, Long> {
-    @Query("SELECT sg FROM StudentGroup sg LEFT JOIN FETCH sg.students")
+    @Query("SELECT sg FROM StudentGroup sg LEFT JOIN FETCH sg.users")
     List<StudentGroup> findAllWithStudents();
     StudentGroup findByName(String name);
 }

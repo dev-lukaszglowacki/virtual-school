@@ -1,36 +1,39 @@
 package com.virtualschool.virtual_school_backend.config;
 
-import com.virtualschool.virtual_school_backend.model.*;
-import com.virtualschool.virtual_school_backend.repository.*;
-import com.virtualschool.virtual_school_backend.service.KeycloakService;
-import org.keycloak.representations.idm.UserRepresentation;
+import com.virtualschool.virtual_school_backend.model.Role;
+import com.virtualschool.virtual_school_backend.model.User;
+import com.virtualschool.virtual_school_backend.repository.UserRepository;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.time.DayOfWeek;
 import java.time.LocalTime;
+import com.virtualschool.virtual_school_backend.model.LessonPlan;
+import com.virtualschool.virtual_school_backend.model.StudentGroup;
+import com.virtualschool.virtual_school_backend.model.Subject;
+import com.virtualschool.virtual_school_backend.repository.LessonPlanRepository;
+import com.virtualschool.virtual_school_backend.repository.StudentGroupRepository;
+import com.virtualschool.virtual_school_backend.repository.SubjectRepository;
+import com.virtualschool.virtual_school_backend.service.KeycloakService;
+import org.keycloak.representations.idm.UserRepresentation;
 
 @Component
 public class DataInitializer implements CommandLineRunner {
 
     private final KeycloakService keycloakService;
-    private final LecturerRepository lecturerRepository;
+    private final UserRepository userRepository;
     private final SubjectRepository subjectRepository;
-    private final StudentRepository studentRepository;
     private final StudentGroupRepository studentGroupRepository;
     private final LessonPlanRepository lessonPlanRepository;
 
     public DataInitializer(KeycloakService keycloakService,
-                           LecturerRepository lecturerRepository,
+                           UserRepository userRepository,
                            SubjectRepository subjectRepository,
-                           StudentRepository studentRepository,
                            StudentGroupRepository studentGroupRepository,
                            LessonPlanRepository lessonPlanRepository) {
         this.keycloakService = keycloakService;
-        this.lecturerRepository = lecturerRepository;
+        this.userRepository = userRepository;
         this.subjectRepository = subjectRepository;
-        this.studentRepository = studentRepository;
         this.studentGroupRepository = studentGroupRepository;
         this.lessonPlanRepository = lessonPlanRepository;
     }
@@ -43,41 +46,29 @@ public class DataInitializer implements CommandLineRunner {
 
         for (int i = 0; i < maxRetries; i++) {
             try {
-                UserRepresentation teacherUser = keycloakService.findByUsername("teacheruser");
-                Lecturer lecturer = null;
-                if (teacherUser != null) {
-                    if (lecturerRepository.findByKeycloakId(teacherUser.getId()).isEmpty()) {
-                        lecturer = new Lecturer(teacherUser.getId());
-                        lecturerRepository.save(lecturer);
-
-                        Subject history = subjectRepository.findByName("History");
-                        if (history != null) {
-                            history.setLecturer(lecturer);
-                            subjectRepository.save(history);
-                        }
-
-                        Subject biology = subjectRepository.findByName("Biology");
-                        if (biology != null) {
-                            biology.setLecturer(lecturer);
-                            subjectRepository.save(biology);
-                        }
+                UserRepresentation teacherUserRep = keycloakService.findByUsername("teacheruser");
+                User lecturer = null;
+                if (teacherUserRep != null) {
+                    if (userRepository.findByKeycloakId(teacherUserRep.getId()).isEmpty()) {
+                        lecturer = new User(teacherUserRep.getId(), Role.LECTURER);
+                        userRepository.save(lecturer);
                     } else {
-                        lecturer = lecturerRepository.findByKeycloakId(teacherUser.getId()).get();
+                        lecturer = userRepository.findByKeycloakId(teacherUserRep.getId()).get();
                     }
                 }
 
-                UserRepresentation studentUser = keycloakService.findByUsername("studentuser");
-                if (studentUser != null) {
-                    if (studentRepository.findByKeycloakId(studentUser.getId()).isEmpty()) {
-                        Student student = new Student(studentUser.getId());
-                        studentRepository.save(student);
+                UserRepresentation studentUserRep = keycloakService.findByUsername("studentuser");
+                if (studentUserRep != null) {
+                    if (userRepository.findByKeycloakId(studentUserRep.getId()).isEmpty()) {
+                        User student = new User(studentUserRep.getId(), Role.STUDENT);
+                        userRepository.save(student);
 
                         StudentGroup groupA1 = studentGroupRepository.findByName("A1");
                         if (groupA1 == null) {
                             groupA1 = new StudentGroup("A1");
                         }
 
-                        groupA1.getStudents().add(student);
+                        groupA1.getUsers().add(student);
                         studentGroupRepository.save(groupA1);
                     }
                 }
@@ -91,7 +82,7 @@ public class DataInitializer implements CommandLineRunner {
                         LessonPlan lesson1 = new LessonPlan();
                         lesson1.setStudentGroup(groupA1);
                         lesson1.setSubject(history);
-                        lesson1.setLecturer(lecturer);
+                        lesson1.setUser(lecturer);
                         lesson1.setDayOfWeek(DayOfWeek.MONDAY);
                         lesson1.setStartTime(LocalTime.of(9, 0));
                         lesson1.setEndTime(LocalTime.of(10, 0));
@@ -100,7 +91,7 @@ public class DataInitializer implements CommandLineRunner {
                         LessonPlan lesson2 = new LessonPlan();
                         lesson2.setStudentGroup(groupA1);
                         lesson2.setSubject(biology);
-                        lesson2.setLecturer(lecturer);
+                        lesson2.setUser(lecturer);
                         lesson2.setDayOfWeek(DayOfWeek.TUESDAY);
                         lesson2.setStartTime(LocalTime.of(10, 0));
                         lesson2.setEndTime(LocalTime.of(11, 0));

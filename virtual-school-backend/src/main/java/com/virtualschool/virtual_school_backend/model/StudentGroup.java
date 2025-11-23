@@ -16,11 +16,11 @@ public class StudentGroup {
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
-            name = "student_group_students",
+            name = "student_group_users",
             joinColumns = @JoinColumn(name = "student_group_id"),
-            inverseJoinColumns = @JoinColumn(name = "student_id")
+            inverseJoinColumns = @JoinColumn(name = "user_id")
     )
-    private Set<Student> students = new HashSet<>();
+    private Set<User> users = new HashSet<>();
 
     public StudentGroup() {
     }
@@ -45,11 +45,11 @@ public class StudentGroup {
         this.name = name;
     }
 
-    public Set<Student> getStudents() {
-        return students;
+    public Set<User> getUsers() {
+        return users;
     }
 
-    public void setStudents(Set<Student> students) {
-        this.students = students;
+    public void setUsers(Set<User> users) {
+        this.users = users;
     }
 }

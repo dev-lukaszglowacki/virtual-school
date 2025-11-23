@@ -6,12 +6,12 @@ import java.util.stream.Collectors;
 public class StudentGroupDTO {
     private Long id;
     private String name;
-    private Set<StudentDTO> students;
+    private Set<UserDTO> students;
 
     public StudentGroupDTO() {
     }
 
-    public StudentGroupDTO(Long id, String name, Set<StudentDTO> students) {
+    public StudentGroupDTO(Long id, String name, Set<UserDTO> students) {
         this.id = id;
         this.name = name;
         this.students = students;
@@ -33,11 +33,11 @@ public class StudentGroupDTO {
         this.name = name;
     }
 
-    public Set<StudentDTO> getStudents() {
+    public Set<UserDTO> getStudents() {
         return students;
     }
 
-    public void setStudents(Set<StudentDTO> students) {
+    public void setStudents(Set<UserDTO> students) {
         this.students = students;
     }
 }

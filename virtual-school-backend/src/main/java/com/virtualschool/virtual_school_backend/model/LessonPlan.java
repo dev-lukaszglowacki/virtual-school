@@ -15,8 +15,8 @@ public class LessonPlan {
     private Subject subject;
 
     @ManyToOne
-    @JoinColumn(name = "lecturer_id")
-    private Lecturer lecturer;
+    @JoinColumn(name = "user_id")
+    private User user;
 
     @ManyToOne
     @JoinColumn(name = "student_group_id")
@@ -28,8 +28,6 @@ public class LessonPlan {
 
     public LessonPlan() {
     }
-
-    // Getters and Setters
 
     public Long getId() {
         return id;
@@ -47,12 +45,12 @@ public class LessonPlan {
         this.subject = subject;
     }
 
-    public Lecturer getLecturer() {
-        return lecturer;
+    public User getUser() {
+        return user;
     }
 
-    public void setLecturer(Lecturer lecturer) {
-        this.lecturer = lecturer;
+    public void setUser(User user) {
+        this.user = user;
     }
 
     public StudentGroup getStudentGroup() {

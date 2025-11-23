@@ -1,16 +1,21 @@
 package com.virtualschool.virtual_school_backend.controller;
 
 import com.virtualschool.virtual_school_backend.model.Subject;
-import com.virtualschool.virtual_school_backend.repository.LecturerRepository;
 import com.virtualschool.virtual_school_backend.repository.LessonPlanRepository;
 import com.virtualschool.virtual_school_backend.repository.SubjectRepository;
+import com.virtualschool.virtual_school_backend.repository.UserRepository;
+import com.virtualschool.virtual_school_backend.service.KeycloakService;
+
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.util.Arrays;
 import java.util.Optional;
@@ -24,26 +29,37 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
 import org.springframework.boot.autoconfigure.security.oauth2.resource.servlet.OAuth2ResourceServerAutoConfiguration;
 
-@WebMvcTest(controllers = SubjectController.class, excludeAutoConfiguration = {SecurityAutoConfiguration.class, OAuth2ResourceServerAutoConfiguration.class})
+@WebMvcTest(excludeAutoConfiguration = {SecurityAutoConfiguration.class, OAuth2ResourceServerAutoConfiguration.class})
 @ActiveProfiles("test")
 class SubjectControllerTest {
 
-    @Autowired
     private MockMvc mockMvc;
 
-    @MockBean
+    @Mock
     private SubjectRepository subjectRepository;
 
-    @MockBean
-    private LecturerRepository lecturerRepository;
+    @Mock
+    private UserRepository userRepository;
 
-    @MockBean
+    @Mock
     private LessonPlanRepository lessonPlanRepository;
+
+    @Mock
+    private KeycloakService keycloakService;
+
+    @InjectMocks
+    private SubjectController subjectController;
+
+    @BeforeEach
+    void setUp() {
+        MockitoAnnotations.openMocks(this);
+        mockMvc = MockMvcBuilders.standaloneSetup(subjectController).build();
+    }
 
     @Test
     void getAllSubjects() throws Exception {
-        Subject subject1 = new Subject("Mathematics", "Advanced Calculus", null);
-        Subject subject2 = new Subject("History", "World History", null);
+        Subject subject1 = new Subject("Mathematics", "Advanced Calculus");
+        Subject subject2 = new Subject("History", "World History");
         when(subjectRepository.findAll()).thenReturn(Arrays.asList(subject1, subject2));
 
         mockMvc.perform(get("/subjects"))
@@ -54,7 +70,7 @@ class SubjectControllerTest {
 
     @Test
     void getSubjectById() throws Exception {
-        Subject subject = new Subject("Mathematics", "Advanced Calculus", null);
+        Subject subject = new Subject("Mathematics", "Advanced Calculus");
         subject.setId(1L);
         when(subjectRepository.findById(1L)).thenReturn(Optional.of(subject));
 
@@ -65,7 +81,7 @@ class SubjectControllerTest {
 
     @Test
     void createSubject() throws Exception {
-        Subject subject = new Subject("Mathematics", "Advanced Calculus", null);
+        Subject subject = new Subject("Mathematics", "Advanced Calculus");
         subject.setId(1L);
         when(subjectRepository.save(any(Subject.class))).thenReturn(subject);
 

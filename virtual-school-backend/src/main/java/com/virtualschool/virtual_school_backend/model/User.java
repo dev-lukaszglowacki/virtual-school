@@ -1,15 +1,13 @@
 package com.virtualschool.virtual_school_backend.model;
 
-import com.fasterxml.jackson.annotation.JsonIdentityInfo;
-import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.persistence.*;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
 @Entity
-@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
-public class Student {
+@Table(name = "users") // Renamed to "users" to avoid conflict with "user" keyword in SQL
+public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -17,14 +15,19 @@ public class Student {
     @Column(unique = true, nullable = false)
     private String keycloakId;
 
-    @ManyToMany(mappedBy = "students")
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private Role role;
+
+    @ManyToMany(mappedBy = "users")
     private Set<StudentGroup> groups = new HashSet<>();
 
-    public Student() {
+    public User() {
     }
 
-    public Student(String keycloakId) {
+    public User(String keycloakId, Role role) {
         this.keycloakId = keycloakId;
+        this.role = role;
     }
 
     public Long getId() {
@@ -43,6 +46,14 @@ public class Student {
         this.keycloakId = keycloakId;
     }
 
+    public Role getRole() {
+        return role;
+    }
+
+    public void setRole(Role role) {
+        this.role = role;
+    }
+
     public Set<StudentGroup> getGroups() {
         return groups;
     }
@@ -55,20 +66,12 @@ public class Student {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        Student student = (Student) o;
-        return Objects.equals(id, student.id) && Objects.equals(keycloakId, student.keycloakId);
+        User user = (User) o;
+        return Objects.equals(id, user.id) && Objects.equals(keycloakId, user.keycloakId) && role == user.role;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, keycloakId);
-    }
-
-    @Override
-    public String toString() {
-        return "Student{" +
-               "id=" + id +
-               ", keycloakId='" + keycloakId + '\'' +
-               '}';
+        return Objects.hash(id, keycloakId, role);
     }
 }

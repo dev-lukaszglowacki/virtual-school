@@ -14,7 +14,7 @@ function TeacherTimetable() {
         return;
       }
       try {
-        const meResponse = await fetch('/api/lecturers/me', {
+        const meResponse = await fetch('/api/users/me', {
           headers: { Authorization: `Bearer ${keycloak.token}` },
         });
         if (!meResponse.ok) throw new Error('Could not fetch lecturer data');
