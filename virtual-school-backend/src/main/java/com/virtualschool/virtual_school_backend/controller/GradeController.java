@@ -99,7 +99,9 @@ public class GradeController {
                 grade.getSubject().getName(),
                 grade.getLecturer().getId(),
                 lecturerUser.getFirstName() + " " + lecturerUser.getLastName(),
-                grade.getGrade().getValue()
+                grade.getGrade().getValue(),
+                grade.getCreatedAt(),
+                grade.getUpdatedAt()
         );
     }
 }

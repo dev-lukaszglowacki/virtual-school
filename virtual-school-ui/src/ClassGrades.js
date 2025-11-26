@@ -149,7 +149,7 @@ const ClassGrades = () => {
                             <TableRow key={student.id}>
                                 <TableCell>{student.firstName} {student.lastName}</TableCell>
                                 <TableCell>
-                                    {grades[student.id] && grades[student.id].map(grade => grade.grade).join(', ')}
+                                    {grades[student.id] && grades[student.id].map(grade => `${grade.grade} (${grade.lecturerName}, ${new Date(grade.createdAt).toLocaleDateString()})`).join(', ')}
                                 </TableCell>
                                 <TableCell>
                                     <Box sx={{ display: 'flex', alignItems: 'center' }}>

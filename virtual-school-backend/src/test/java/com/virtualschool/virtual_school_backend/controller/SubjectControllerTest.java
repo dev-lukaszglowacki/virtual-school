@@ -1,33 +1,32 @@
 package com.virtualschool.virtual_school_backend.controller;
 
+import java.util.Arrays;
+import java.util.Optional;
+
 import com.virtualschool.virtual_school_backend.model.Subject;
-import com.virtualschool.virtual_school_backend.repository.LessonPlanRepository;
 import com.virtualschool.virtual_school_backend.repository.SubjectRepository;
-import com.virtualschool.virtual_school_backend.repository.UserRepository;
-import com.virtualschool.virtual_school_backend.service.KeycloakService;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.boot.autoconfigure.security.oauth2.resource.servlet.OAuth2ResourceServerAutoConfiguration;
+import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
-import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
-import java.util.Arrays;
-import java.util.Optional;
-
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
-import static org.hamcrest.Matchers.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-
-import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
-import org.springframework.boot.autoconfigure.security.oauth2.resource.servlet.OAuth2ResourceServerAutoConfiguration;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(excludeAutoConfiguration = {SecurityAutoConfiguration.class, OAuth2ResourceServerAutoConfiguration.class})
 @ActiveProfiles("test")
@@ -37,15 +36,6 @@ class SubjectControllerTest {
 
     @Mock
     private SubjectRepository subjectRepository;
-
-    @Mock
-    private UserRepository userRepository;
-
-    @Mock
-    private LessonPlanRepository lessonPlanRepository;
-
-    @Mock
-    private KeycloakService keycloakService;
 
     @InjectMocks
     private SubjectController subjectController;
