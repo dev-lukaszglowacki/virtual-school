@@ -1,7 +1,6 @@
 package com.virtualschool.virtual_school_backend.dto;
 
 import java.util.Set;
-import java.util.stream.Collectors;
 
 public class StudentGroupDTO {
     private Long id;

@@ -46,6 +46,7 @@ const MyGrades = () => {
                             <TableCell>Subject</TableCell>
                             <TableCell>Lecturer</TableCell>
                             <TableCell>Grade</TableCell>
+                            <TableCell>Date</TableCell>
                         </TableRow>
                     </TableHead>
                     <TableBody>
@@ -54,6 +55,7 @@ const MyGrades = () => {
                                 <TableCell>{grade.subjectName}</TableCell>
                                 <TableCell>{grade.lecturerName}</TableCell>
                                 <TableCell>{grade.grade}</TableCell>
+                                <TableCell>{new Date(grade.createdAt).toLocaleString()}</TableCell>
                             </TableRow>
                         ))}
                     </TableBody>

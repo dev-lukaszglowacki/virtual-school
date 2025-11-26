@@ -1,5 +1,9 @@
 package com.virtualschool.virtual_school_backend.controller;
 
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import com.virtualschool.virtual_school_backend.dto.CreateLessonPlanDTO;
 import com.virtualschool.virtual_school_backend.dto.LessonPlanDTO;
 import com.virtualschool.virtual_school_backend.dto.UpdateLessonPlanDTO;
@@ -12,14 +16,18 @@ import com.virtualschool.virtual_school_backend.repository.StudentGroupRepositor
 import com.virtualschool.virtual_school_backend.repository.SubjectRepository;
 import com.virtualschool.virtual_school_backend.repository.UserRepository;
 import com.virtualschool.virtual_school_backend.service.KeycloakService;
+
 import org.keycloak.representations.idm.UserRepresentation;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.Collections;
-import java.util.List;
-import java.util.stream.Collectors;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/lesson-plans")

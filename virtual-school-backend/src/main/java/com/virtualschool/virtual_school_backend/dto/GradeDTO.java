@@ -1,5 +1,7 @@
 package com.virtualschool.virtual_school_backend.dto;
 
+import java.time.LocalDateTime;
+
 public class GradeDTO {
     private Long id;
     private Long studentId;
@@ -9,11 +11,13 @@ public class GradeDTO {
     private Long lecturerId;
     private String lecturerName;
     private Integer grade;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 
     public GradeDTO() {
     }
 
-    public GradeDTO(Long id, Long studentId, String studentName, Long subjectId, String subjectName, Long lecturerId, String lecturerName, Integer grade) {
+    public GradeDTO(Long id, Long studentId, String studentName, Long subjectId, String subjectName, Long lecturerId, String lecturerName, Integer grade, LocalDateTime createdAt, LocalDateTime updatedAt) {
         this.id = id;
         this.studentId = studentId;
         this.studentName = studentName;
@@ -22,6 +26,8 @@ public class GradeDTO {
         this.lecturerId = lecturerId;
         this.lecturerName = lecturerName;
         this.grade = grade;
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
     }
 
     public Long getId() {
@@ -86,5 +92,21 @@ public class GradeDTO {
 
     public void setGrade(Integer grade) {
         this.grade = grade;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(LocalDateTime updatedAt) {
+        this.updatedAt = updatedAt;
     }
 }
