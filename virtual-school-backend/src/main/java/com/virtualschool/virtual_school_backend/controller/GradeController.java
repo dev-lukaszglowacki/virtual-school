@@ -1,24 +1,31 @@
 package com.virtualschool.virtual_school_backend.controller;
 
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import com.virtualschool.virtual_school_backend.dto.GradeDTO;
 import com.virtualschool.virtual_school_backend.model.Grade;
-import com.virtualschool.virtual_school_backend.model.User;
-import com.virtualschool.virtual_school_backend.model.Subject;
 import com.virtualschool.virtual_school_backend.model.GradeValue;
+import com.virtualschool.virtual_school_backend.model.Subject;
+import com.virtualschool.virtual_school_backend.model.User;
+import com.virtualschool.virtual_school_backend.producer.GradeProducer;
 import com.virtualschool.virtual_school_backend.repository.GradeRepository;
-import com.virtualschool.virtual_school_backend.repository.UserRepository;
 import com.virtualschool.virtual_school_backend.repository.SubjectRepository;
+import com.virtualschool.virtual_school_backend.repository.UserRepository;
 import com.virtualschool.virtual_school_backend.service.KeycloakService;
+
 import org.keycloak.representations.idm.UserRepresentation;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.Collections;
-import java.util.List;
-import java.util.stream.Collectors;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/grades")
@@ -28,13 +35,15 @@ public class GradeController {
     private final UserRepository userRepository;
     private final SubjectRepository subjectRepository;
     private final KeycloakService keycloakService;
+    private final GradeProducer gradeProducer;
 
     public GradeController(GradeRepository gradeRepository, UserRepository userRepository,
-                           SubjectRepository subjectRepository, KeycloakService keycloakService) {
+                           SubjectRepository subjectRepository, KeycloakService keycloakService, GradeProducer gradeProducer) {
         this.gradeRepository = gradeRepository;
         this.userRepository = userRepository;
         this.subjectRepository = subjectRepository;
         this.keycloakService = keycloakService;
+        this.gradeProducer = gradeProducer;
     }
 
     @PostMapping
@@ -53,6 +62,13 @@ public class GradeController {
 
         Grade grade = new Grade(student, subject, lecturer, GradeValue.fromValue(gradeDTO.getGrade()));
         grade = gradeRepository.save(grade);
+
+        // Send notification to Kafka
+        String notificationMessage = String.format(
+                "{\"studentId\": %d, \"subjectName\": \"%s\", \"gradeValue\": \"%s\"}",
+                student.getId(), subject.getName(), grade.getGrade().getValue()
+        );
+        gradeProducer.sendGradeNotification(notificationMessage);
 
         return new ResponseEntity<>(toDTO(grade), HttpStatus.CREATED);
     }

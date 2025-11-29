@@ -5,6 +5,8 @@ services:
       - "3000:3000"
     volumes:
       - ./virtual-school-ui:/app
+    command: >
+      sh -c "npm install && npm start"
     networks:
       - keycloak-network
     depends_on:
@@ -27,11 +29,15 @@ services:
         condition: service_healthy
       keycloak-db:
         condition: service_healthy
+      kafka:
+        condition: service_started
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
       interval: 10s
       timeout: 5s
       retries: 5
+    environment:
+      - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
 
   keycloak:
     image: quay.io/keycloak/keycloak:latest
@@ -58,7 +64,7 @@ services:
       - "start-dev"
       - "--import-realm"
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/health/ready"]
+      test: ["CMD", "curl", "-f", "http://localhost:8080/admin/health"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -119,6 +125,53 @@ services:
       timeout: 5s
       retries: 5
 
+
+  kafka:
+    image: confluentinc/cp-kafka:latest
+    networks:
+      - keycloak-network
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_PROCESS_ROLES: 'broker,controller'
+      KAFKA_NODE_ID: 1
+      KAFKA_CONTROLLER_QUORUM_VOTERS: '1@kafka:9093'
+      KAFKA_LISTENERS: 'PLAINTEXT://0.0.0.0:9092,CONTROLLER://kafka:9093'
+      KAFKA_ADVERTISED_LISTENERS: 'PLAINTEXT://kafka:9092'
+      KAFKA_INTER_BROKER_LISTENER_NAME: 'PLAINTEXT'
+      KAFKA_CONTROLLER_LISTENER_NAMES: 'CONTROLLER'
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_METADATA_LOG_DIR: '/tmp/kraft-metadata-logs'
+
+  notification-service:
+    build:
+      context: ./notification-service
+      dockerfile: Dockerfile
+    networks:
+      - keycloak-network
+    depends_on:
+      kafka:
+        condition: service_started
+    environment:
+      - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+      - NOTIFICATION_TOPIC=notifications
+    restart: always
+
+  reporting-service:
+    build:
+      context: ./reporting-service
+      dockerfile: Dockerfile
+    networks:
+      - keycloak-network
+    depends_on:
+      kafka:
+        condition: service_started
+    environment:
+      - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+      - REPORTING_TOPIC=reporting_jobs
+    restart: always
 
 networks:
   keycloak-network:
