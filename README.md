@@ -1,4 +1,4 @@
-# virtual-school
+# Virtual-School
 
 # Project Overview
 
