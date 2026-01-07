@@ -144,6 +144,11 @@ services:
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
       KAFKA_METADATA_LOG_DIR: '/tmp/kraft-metadata-logs'
+    healthcheck:
+      test: [ "CMD-SHELL", "kafka-topics --bootstrap-server kafka:9092 --list" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   notification-service:
     build:
@@ -153,11 +158,16 @@ services:
       - keycloak-network
     depends_on:
       kafka:
-        condition: service_started
+        condition: service_healthy
     environment:
       - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
       - NOTIFICATION_TOPIC=notifications
     restart: always
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8080/actuator/health" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   reporting-service:
     build:
@@ -167,11 +177,16 @@ services:
       - keycloak-network
     depends_on:
       kafka:
-        condition: service_started
+        condition: service_healthy
     environment:
       - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
       - REPORTING_TOPIC=reporting_jobs
     restart: always
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8080/actuator/health" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
 networks:
   keycloak-network:
