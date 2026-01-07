@@ -32,6 +32,11 @@ The frontend is a single-page application built with **React**.
 
 The entire infrastructure is managed via **Docker Compose**, which orchestrates the frontend, backend, databases, and **Keycloak**. A realm is automatically imported on first launch to provide default clients, roles (`admin`, `teacher`, `student`), and users.
 
+The backend uses **Apache Kafka** for asynchronous communication with the following services:
+
+*   **`notification-service`**: Handles and sends notifications to users.
+*   **`reporting-service`**: Generates reports based on data from the main application.
+
 # Getting Started
 
 ## Prerequisites
