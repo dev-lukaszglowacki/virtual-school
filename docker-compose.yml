@@ -37,19 +37,19 @@ services:
       timeout: 5s
       retries: 5
     environment:
-      - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+      - KAFKA_BOOTSTRAP_SERVERS=${KAFKA_BOOTSTRAP_SERVERS}
 
   keycloak:
     image: quay.io/keycloak/keycloak:latest
     environment:
-      - KC_HOSTNAME=localhost
+      - KC_HOSTNAME=${KC_HOSTNAME}
       - KC_DB=postgres
-      - KC_DB_USERNAME=keycloakuser
-      - KC_DB_PASSWORD=keycloakpass
-      - KC_DB_URL_DATABASE=keycloak
-      - KC_DB_URL_HOST=keycloak-db
-      - KC_BOOTSTRAP_ADMIN_USERNAME=keycloakadmin
-      - KC_BOOTSTRAP_ADMIN_PASSWORD=keycloakadmin
+      - KC_DB_USERNAME=${KC_DB_USERNAME}
+      - KC_DB_PASSWORD=${KC_DB_PASSWORD}
+      - KC_DB_URL_DATABASE=${KC_DB_URL_DATABASE}
+      - KC_DB_URL_HOST=${KC_DB_URL_HOST}
+      - KC_BOOTSTRAP_ADMIN_USERNAME=${KC_BOOTSTRAP_ADMIN_USERNAME}
+      - KC_BOOTSTRAP_ADMIN_PASSWORD=${KC_BOOTSTRAP_ADMIN_PASSWORD}
     volumes:
       - ./realm-export.json:/opt/keycloak/data/import/realm-export.json
     ports:
@@ -72,9 +72,9 @@ services:
   keycloak-db:
     image: postgres:latest
     environment:
-      - POSTGRES_DB=keycloak
-      - POSTGRES_USER=keycloakuser
-      - POSTGRES_PASSWORD=keycloakpass
+      - POSTGRES_DB=${POSTGRES_DB_KEYCLOAK}
+      - POSTGRES_USER=${POSTGRES_USER_KEYCLOAK}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD_KEYCLOAK}
     ports:
       - "5432:5432"
     volumes:
@@ -91,9 +91,9 @@ services:
   backend-db:
     image: postgres:latest
     environment:
-      - POSTGRES_DB=virtualschooldb
-      - POSTGRES_USER=schooluser
-      - POSTGRES_PASSWORD=schoolpass
+      - POSTGRES_DB=${POSTGRES_DB_BACKEND}
+      - POSTGRES_USER=${POSTGRES_USER_BACKEND}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD_BACKEND}
     ports:
       - "5433:5432"
     volumes:
@@ -160,8 +160,8 @@ services:
       kafka:
         condition: service_healthy
     environment:
-      - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
-      - NOTIFICATION_TOPIC=notifications
+      - KAFKA_BOOTSTRAP_SERVERS=${KAFKA_BOOTSTRAP_SERVERS}
+      - NOTIFICATION_TOPIC=${NOTIFICATION_TOPIC}
     restart: always
     healthcheck:
       test: [ "CMD", "curl", "-f", "http://localhost:8080/actuator/health" ]
@@ -179,8 +179,8 @@ services:
       kafka:
         condition: service_healthy
     environment:
-      - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
-      - REPORTING_TOPIC=reporting_jobs
+      - KAFKA_BOOTSTRAP_SERVERS=${KAFKA_BOOTSTRAP_SERVERS}
+      - REPORTING_TOPIC=${REPORTING_TOPIC}
     restart: always
     healthcheck:
       test: [ "CMD", "curl", "-f", "http://localhost:8080/actuator/health" ]
