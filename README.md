@@ -71,6 +71,8 @@ The entire project is designed to be run with a single command from the project 
 
 ## Default Credentials
 
+**Note:** Default settings in file: .env.tmp
+
 *   **Admin:** `adminuser` / `adminpass`
 *   **Teacher:** `teacheruser` / `teacherpass`
 *   **Student:** `studentuser` / `studentpass`
