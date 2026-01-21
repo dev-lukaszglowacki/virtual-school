@@ -27,6 +27,8 @@ services:
     depends_on:
       backend-db:
         condition: service_healthy
+      keycloak:
+        condition: service_started
       keycloak-db:
         condition: service_healthy
       kafka:
@@ -50,6 +52,7 @@ services:
       - KC_DB_URL_HOST=${KC_DB_URL_HOST}
       - KC_BOOTSTRAP_ADMIN_USERNAME=${KC_BOOTSTRAP_ADMIN_USERNAME}
       - KC_BOOTSTRAP_ADMIN_PASSWORD=${KC_BOOTSTRAP_ADMIN_PASSWORD}
+      - KC_HEALTH_ENABLED=true
     volumes:
       - ./realm-export.json:/opt/keycloak/data/import/realm-export.json
     ports:
@@ -64,7 +67,7 @@ services:
       - "start-dev"
       - "--import-realm"
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/admin/health"]
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:8080/health/ready"]
       interval: 10s
       timeout: 5s
       retries: 5
