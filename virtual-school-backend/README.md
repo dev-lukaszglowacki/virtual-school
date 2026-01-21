@@ -4,7 +4,7 @@ This is the backend service for the Virtual School project. It is a Java Spring 
 
 ## Technologies Used
 
-*   **Java 17**
+*   **Java 21**
 *   **Spring Boot**
 *   **Spring Security** (OAuth 2.0 Resource Server with JWT)
 *   **Spring Data JPA** (with Hibernate)
@@ -18,7 +18,7 @@ While the recommended way to run the entire application is using the `docker-com
 
 ### Prerequisites
 
-*   Java 17 (or newer)
+*   Java 21
 *   Maven
 *   A running PostgreSQL database
 *   A running Keycloak instance with the `virtual-school` realm configured
