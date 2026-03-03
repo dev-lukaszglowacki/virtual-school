@@ -14,6 +14,7 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.core.convert.converter.Converter;
+import org.springframework.lang.NonNull;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -79,7 +80,7 @@ public class SecurityConfig {
 
     static class KeycloakRealmRoleConverter implements Converter<Jwt, Collection<GrantedAuthority>> {
         @Override
-        public Collection<GrantedAuthority> convert(Jwt jwt) {
+        public Collection<GrantedAuthority> convert(@NonNull Jwt jwt) {
             final Map<String, Object> realmAccess = (Map<String, Object>) jwt.getClaims().get("realm_access");
             if (realmAccess == null || realmAccess.isEmpty()) {
                 return List.of();

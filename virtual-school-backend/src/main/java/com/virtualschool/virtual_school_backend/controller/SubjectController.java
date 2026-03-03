@@ -10,12 +10,14 @@ import com.virtualschool.virtual_school_backend.repository.SubjectRepository;
 import com.virtualschool.virtual_school_backend.service.KeycloakService;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.springframework.http.ResponseEntity;
+import org.springframework.lang.NonNull;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @RestController
@@ -43,7 +45,7 @@ public class SubjectController {
 
     @GetMapping("/{id}")
     @PreAuthorize("hasAnyRole('admin', 'teacher', 'student')")
-    public ResponseEntity<Subject> getSubjectById(@PathVariable Long id) {
+    public ResponseEntity<Subject> getSubjectById(@NonNull @PathVariable Long id) {
         return subjectRepository.findById(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
@@ -51,13 +53,13 @@ public class SubjectController {
 
     @PostMapping
     @PreAuthorize("hasRole('admin')")
-    public Subject createSubject(@RequestBody Subject subject) {
+    public Subject createSubject(@NonNull @RequestBody Subject subject) {
         return subjectRepository.save(subject);
     }
 
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('admin')")
-    public ResponseEntity<Subject> updateSubject(@PathVariable Long id, @RequestBody Subject subjectDetails) {
+    public ResponseEntity<Subject> updateSubject(@NonNull @PathVariable Long id, @RequestBody Subject subjectDetails) {
         return subjectRepository.findById(id)
                 .map(subject -> {
                     subject.setName(subjectDetails.getName());
@@ -69,9 +71,10 @@ public class SubjectController {
 
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('admin')")
-    public ResponseEntity<Void> deleteSubject(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteSubject(@NonNull @PathVariable Long id) {
         return subjectRepository.findById(id)
                 .map(subject -> {
+                    Objects.requireNonNull(subject, "Subject cannot be null");
                     subjectRepository.delete(subject);
                     return ResponseEntity.ok().<Void>build();
                 })

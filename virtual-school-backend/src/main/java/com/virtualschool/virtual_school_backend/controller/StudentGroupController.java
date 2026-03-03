@@ -12,10 +12,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.http.ResponseEntity;
+import org.springframework.lang.NonNull;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -69,13 +71,13 @@ public class StudentGroupController {
 
     @PostMapping
     @PreAuthorize("hasRole('admin')")
-    public StudentGroup createGroup(@RequestBody StudentGroup studentGroup) {
+    public StudentGroup createGroup(@NonNull @RequestBody StudentGroup studentGroup) {
         return studentGroupRepository.save(studentGroup);
     }
 
     @PutMapping("/{groupId}")
     @PreAuthorize("hasRole('admin')")
-    public ResponseEntity<StudentGroup> updateGroup(@PathVariable Long groupId, @RequestBody StudentGroup groupDetails) {
+    public ResponseEntity<StudentGroup> updateGroup(@NonNull @PathVariable Long groupId, @RequestBody StudentGroup groupDetails) {
         return studentGroupRepository.findById(groupId)
                 .map(group -> {
                     group.setName(groupDetails.getName());
@@ -86,9 +88,10 @@ public class StudentGroupController {
 
     @DeleteMapping("/{groupId}")
     @PreAuthorize("hasRole('admin')")
-    public ResponseEntity<Void> deleteGroup(@PathVariable Long groupId) {
+    public ResponseEntity<Void> deleteGroup(@NonNull @PathVariable Long groupId) {
         return studentGroupRepository.findById(groupId)
                 .map(group -> {
+                    Objects.requireNonNull(group, "StudentGroup cannot be null");
                     studentGroupRepository.delete(group);
                     return ResponseEntity.ok().<Void>build();
                 })
@@ -97,7 +100,7 @@ public class StudentGroupController {
 
     @PostMapping("/{groupId}/students/{studentId}")
     @PreAuthorize("hasRole('admin')")
-    public ResponseEntity<StudentGroup> addStudentToGroup(@PathVariable Long groupId, @PathVariable Long studentId) {
+    public ResponseEntity<StudentGroup> addStudentToGroup(@NonNull @PathVariable Long groupId, @NonNull @PathVariable Long studentId) {
         User student = userRepository.findById(studentId).orElse(null);
         StudentGroup group = studentGroupRepository.findById(groupId).orElse(null);
 
@@ -112,7 +115,7 @@ public class StudentGroupController {
 
     @DeleteMapping("/{groupId}/students/{studentId}")
     @PreAuthorize("hasRole('admin')")
-    public ResponseEntity<StudentGroup> removeStudentFromGroup(@PathVariable Long groupId, @PathVariable Long studentId) {
+    public ResponseEntity<StudentGroup> removeStudentFromGroup(@NonNull @PathVariable Long groupId, @NonNull @PathVariable Long studentId) {
         User student = userRepository.findById(studentId).orElse(null);
         StudentGroup group = studentGroupRepository.findById(groupId).orElse(null);
 
