@@ -19,6 +19,7 @@ import com.virtualschool.virtual_school_backend.service.KeycloakService;
 
 import org.keycloak.representations.idm.UserRepresentation;
 import org.springframework.http.ResponseEntity;
+import org.springframework.lang.NonNull;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -81,7 +82,7 @@ public class LessonPlanController {
 
     @PostMapping
     @PreAuthorize("hasRole('admin')")
-    public LessonPlan createLessonPlan(@RequestBody CreateLessonPlanDTO lessonPlanDetails) {
+    public LessonPlan createLessonPlan(@NonNull @RequestBody CreateLessonPlanDTO lessonPlanDetails) {
         Subject subject = subjectRepository.findById(lessonPlanDetails.getSubjectId()).orElse(null);
         User user = userRepository.findById(lessonPlanDetails.getLecturerId()).orElse(null);
         StudentGroup studentGroup = studentGroupRepository.findById(lessonPlanDetails.getGroupId()).orElse(null);
@@ -99,7 +100,7 @@ public class LessonPlanController {
 
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('admin')")
-    public ResponseEntity<LessonPlan> updateLessonPlan(@PathVariable Long id, @RequestBody UpdateLessonPlanDTO lessonPlanDetails) {
+    public ResponseEntity<LessonPlan> updateLessonPlan(@NonNull @PathVariable Long id, @RequestBody UpdateLessonPlanDTO lessonPlanDetails) {
         return lessonPlanRepository.findById(id)
             .map(lessonPlan -> {
                 Subject subject = subjectRepository.findById(lessonPlanDetails.getSubjectId()).orElse(null);
@@ -119,7 +120,7 @@ public class LessonPlanController {
 
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('admin')")
-    public ResponseEntity<Void> deleteLessonPlan(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteLessonPlan(@NonNull @PathVariable Long id) {
         return lessonPlanRepository.findById(id)
             .map(lessonPlan -> {
                 lessonPlanRepository.delete(lessonPlan);
